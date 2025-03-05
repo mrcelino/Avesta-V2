@@ -24,5 +24,8 @@
         "tailwindcss": "^3.2.1",
         "typescript": "^5.0.2",
         "vite": "^6.0.11"
+    },
+    "dependencies": {
+        "@inertiajs/inertia-react": "^0.8.1"
     }
 }
