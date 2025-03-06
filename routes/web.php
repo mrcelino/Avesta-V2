@@ -12,12 +12,10 @@ Route::middleware('guest')->group(function () {
 
 });
 
-
-
-Route::get('/', function () {
-    return Inertia::render('Welcome');
-});
-
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
+Route::group([], function () {
+    Route::get('/', fn () => Inertia::render('Welcome'));
+    Route::get('/dashboard', fn () => Inertia::render('Dashboard'));
+    Route::get('/contact', fn () => Inertia::render('Guest/Contact'));
+    Route::get('/about', fn () => Inertia::render('Guest/About'));
+    Route::get('/product', fn () => Inertia::render('Guest/Product'));
 });
