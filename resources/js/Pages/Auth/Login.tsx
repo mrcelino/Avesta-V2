@@ -1,110 +1,159 @@
-import Checkbox from '@/Components/Checkbox';
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import React, { useState } from "react";
+import { useForm, Link } from "@inertiajs/react";
+import { FormEvent } from "react";
 
-export default function Login({
-    status,
-    canResetPassword,
-}: {
-    status?: string;
-    canResetPassword: boolean;
-}) {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        email: '',
-        password: '',
-        remember: false as boolean,
+type Errors = {
+    email?: string[];
+    password?: string[];
+};
+
+const Login = ({ errors }: { errors: Errors }) => {
+    const { data, setData } = useForm({
+        email: "",
+        password: "",
     });
 
-    const submit: FormEventHandler = (e) => {
-        e.preventDefault();
+    const [apiErrors, setApiErrors] = useState<Errors>({});
+    const [processing, setProcessing] = useState(false);
 
-        post(route('login'), {
-            onFinish: () => reset('password'),
-        });
+    const handleSubmit = async (e: FormEvent) => {
+        e.preventDefault();
+        setProcessing(true);
+
+        try {
+            const response = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw result;
+            }
+
+            const { user } = result;
+
+            // ✅ Redirect berdasarkan role
+            const redirectPaths: Record<string, string> = {
+                pemilik: "/mitra",
+                karyawan: "/karyawan",
+                default: "/dashboard",
+            };
+
+            window.location.href =
+                redirectPaths[user.role] ?? redirectPaths.default;
+        } catch (error: any) {
+            setApiErrors(error.errors || {});
+        } finally {
+            setProcessing(false);
+        }
     };
 
     return (
-        <GuestLayout>
-            <Head title="Log in" />
-
-            {status && (
-                <div className="mb-4 text-sm font-medium text-green-600">
-                    {status}
-                </div>
-            )}
-
-            <form onSubmit={submit}>
-                <div>
-                    <InputLabel htmlFor="email" value="Email" />
-
-                    <TextInput
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        className="mt-1 block w-full"
-                        autoComplete="username"
-                        isFocused={true}
-                        onChange={(e) => setData('email', e.target.value)}
+        <div
+            className="bg-pink flex items-center justify-center min-h-screen text-black"
+            style={{ backgroundImage: `url('/image/bghero.png')` }}
+        >
+            <div
+                className="bg-white rounded-3xl shadow-lg p-12 flex"
+                style={{ width: "1000px" }}
+            >
+                <div className="w-5/12 hidden md:flex items-center justify-center rounded-3xl bg-[#F99BA9]">
+                    <img
+                        alt="Illustration"
+                        className="rounded-lg p-4"
+                        height={400}
+                        src="/image/login.png"
+                        width={400}
                     />
-
-                    <InputError message={errors.email} className="mt-2" />
                 </div>
-
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
-
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        autoComplete="current-password"
-                        onChange={(e) => setData('password', e.target.value)}
+                <div className="w-7/12 pl-16">
+                    <img
+                        alt="Avesta logo"
+                        className="mb-4 mx-auto"
+                        height={40}
+                        src="/image/avesta.png"
+                        width={100}
                     />
-
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
-
-                <div className="mt-4 block">
-                    <label className="flex items-center">
-                        <Checkbox
-                            name="remember"
-                            checked={data.remember}
-                            onChange={(e) =>
-                                setData(
-                                    'remember',
-                                    (e.target.checked || false) as false,
-                                )
-                            }
-                        />
-                        <span className="ms-2 text-sm text-gray-600">
-                            Remember me
-                        </span>
-                    </label>
-                </div>
-
-                <div className="mt-4 flex items-center justify-end">
-                    {canResetPassword && (
-                        <Link
-                            href={route('password.request')}
-                            className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    <h1 className="text-2xl font-bold mb-2 text-center">
+                        Yuk, Gabung dengan Avesta!
+                    </h1>
+                    <p className="mb-6 font-semibold text-center">
+                        Dapatkan harga ayam potong paling oke dan <br /> rasakan
+                        mudahnya pesan online setiap hari!
+                    </p>
+                    <form onSubmit={handleSubmit}>
+                        <div className="mb-4">
+                            <input
+                                className="border border-gray-300 rounded-2xl p-2 w-full bg-cInput"
+                                placeholder="Email"
+                                type="email"
+                                value={data.email}
+                                onChange={(e) =>
+                                    setData("email", e.target.value)
+                                }
+                                required
+                            />
+                            {apiErrors.email && (
+                                <span className="text-danger">
+                                    {apiErrors.email.join(", ")}
+                                </span>
+                            )}
+                        </div>
+                        <div className="mb-4">
+                            <input
+                                className="border border-gray-300 rounded-2xl p-2 w-full bg-cInput"
+                                placeholder="Sandi"
+                                type="password"
+                                value={data.password}
+                                onChange={(e) =>
+                                    setData("password", e.target.value)
+                                }
+                                required
+                            />
+                        </div>
+                        <div className="mb-4 mx-1 flex items-center">
+                            <input
+                                id="terms"
+                                type="checkbox"
+                                className="mr-2"
+                            />
+                            <label
+                                htmlFor="terms"
+                                className="text-sm font-semibold"
+                            >
+                                Ingat saya
+                            </label>
+                            <Link
+                                href="/forgotpassword"
+                                className="ml-auto text-sm text-heading"
+                            >
+                                Lupa Password
+                            </Link>
+                        </div>
+                        <button
+                            type="submit"
+                            className="bg-pink text-white rounded-2xl p-2 w-full font-medium"
+                            disabled={processing}
                         >
-                            Forgot your password?
+                            {processing ? "Memproses..." : "Login"}
+                        </button>
+                    </form>
+                    <p className="text-center text-sm mt-40">
+                        Belum punya akun?{" "}
+                        <Link href="/register" className="text-heading">
+                            Daftar
                         </Link>
-                    )}
-
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Log in
-                    </PrimaryButton>
+                    </p>
                 </div>
-            </form>
-        </GuestLayout>
+            </div>
+        </div>
     );
-}
+};
+
+export default Login;
