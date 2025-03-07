@@ -58,7 +58,7 @@ const Hero = () => {
                 type="text"
                 name="q"
                 placeholder="Daging ayam"
-                className="bg-gray-100 rounded-full px-4 py-2 text-gray-400 focus:outline-none flex-grow shadow-inner"
+                className="bg-gray-100 rounded-full px-4 py-2 text-gray-400 focus:outline-hidden grow shadow-inner"
               />
               <button
                 type="submit"

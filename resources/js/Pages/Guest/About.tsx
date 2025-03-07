@@ -76,7 +76,7 @@ const About = () => {
                                         alt="Misi Avesta"
                                     />
                                 </div>
-                                <h3 className="text-lg font-medium text-pink mb-2 flex-grow">
+                                <h3 className="text-lg font-medium text-pink mb-2 grow">
                                     {item.text}
                                 </h3>
                             </div>
