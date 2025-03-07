@@ -6,7 +6,6 @@ const Hero = () => {
             className="relative text-white overflow-hidden flex items-center justify-center bg-cover"
             style={{
                 backgroundImage: "url('/image/bghero.png')",
-                height: "820px",
             }}
         >
             <div className="hidden md:block absolute top-16 left-0 w-96">
@@ -41,7 +40,7 @@ const Hero = () => {
             <div className="container mx-auto px-4 py-24 md:py-32 relative z-10">
                 <div className="flex justify-center md:flex-row items-center">
                     <div className="w-full mb-12 md:mb-0 text-center">
-                        <h1 className="text-4xl md:text-6xl font-bold mt-20 mb-6 leading-10">
+                        <h1 className="text-4xl md:text-6xl font-bold mt-20 mb-6 leading-20">
                             Temukan Ayam Potong <br /> dengan Harga Terbaik di
                             Avesta
                         </h1>
