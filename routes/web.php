@@ -9,7 +9,7 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'show'])->name('login');
     Route::get('/register/{role?}', [RegisterController::class, 'show'])->name('register');
     Route::post('/login', [LoginController::class, 'authenticate']);
-
+    
 });
 
 Route::group([], function () {

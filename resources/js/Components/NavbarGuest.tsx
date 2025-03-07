@@ -7,7 +7,7 @@ const Navbar = () => {
         <Link href="/">
           <img src="/image/avesta.png" alt="Avesta Logo" className="w-24 -mt-2" />
         </Link>
-        <Link href="register" className="bg-heading rounded-3xl text-white px-5 py-1 min-w-20 font-medium transition duration-300 hover:text-heading hover:bg-white hover:border-2 hover:border-heading">Mitra</Link>
+        <Link href="register"   className="bg-heading border-2 border-heading rounded-3xl text-white px-5 py-1 min-w-20 font-medium transition duration-300 hover:text-heading hover:bg-white">Mitra</Link>
       </div>
       <div className="flex-1 flex justify-end items-center space-x-4">
         <div className="flex items-center justify-center">
