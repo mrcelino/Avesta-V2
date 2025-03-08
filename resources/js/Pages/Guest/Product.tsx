@@ -7,7 +7,7 @@ const Product = () => {
             <div className="flex items-center justify-center bg-hero-bg min-h-screen pt-20">
                 <div className="bg-white rounded-3xl shadow-lg p-12 min-w-[1000px]">
                     <div className="justify-center items-center">
-                        <h1 className="text-center text-pink text-3xl font-bold text-pink-600 mb-4">
+                        <h1 className="text-center text-pink text-3xl font-bold mb-4">
                             Temukan Ayam Terbaik di Sekitar Anda
                         </h1>
                         <p className="text-center text-pink mb-8 font-medium leading-7">

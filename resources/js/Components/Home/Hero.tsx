@@ -3,7 +3,7 @@ import React from "react";
 const Hero = () => {
     return (
         <section
-            className="relative text-white overflow-hidden flex items-center justify-center bg-cover"
+            className="relative text-white overflow-hidden flex items-center justify-center bg-cover min-h-screen"
             style={{
                 backgroundImage: "url('/image/bghero.png')",
             }}
