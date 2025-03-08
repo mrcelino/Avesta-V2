@@ -19,7 +19,7 @@ const Login = ({ errors }: { errors: Errors }) => {
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setProcessing(true);
-
+    
         try {
             const response = await fetch("/api/auth/login", {
                 method: "POST",
@@ -29,30 +29,34 @@ const Login = ({ errors }: { errors: Errors }) => {
                 credentials: "include",
                 body: JSON.stringify(data),
             });
-
+    
             const result = await response.json();
-
+    
             if (!response.ok) {
                 throw result;
             }
-
-            const { user } = result;
-
+    
+            const { user, token } = result; // Ambil token dari respons
+    
+            if (token) {
+                localStorage.setItem("token", token); // Simpan token ke localStorage
+            }
+    
             // ✅ Redirect berdasarkan role
             const redirectPaths: Record<string, string> = {
                 pemilik: "/mitra",
                 karyawan: "/karyawan",
                 default: "/dashboard",
             };
-
-            window.location.href =
-                redirectPaths[user.role] ?? redirectPaths.default;
+    
+            window.location.href = redirectPaths[user.role] ?? redirectPaths.default;
         } catch (error: any) {
             setApiErrors(error.errors || {});
         } finally {
             setProcessing(false);
         }
     };
+    
 
     return (
         <div

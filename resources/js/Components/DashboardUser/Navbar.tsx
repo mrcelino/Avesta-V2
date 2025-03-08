@@ -1,6 +1,8 @@
+import axios from 'axios';
 import React from "react";
 import { Link } from '@inertiajs/react';
 import { useState } from "react";
+import { useAuth } from '@/Layouts/AuthLayout';
 
 function LocationDropdown() {
     const [isOpen, setIsOpen] = useState(false);
@@ -51,7 +53,7 @@ function LocationDropdown() {
 function Keranjang(){
   return(
     <>
-      <Link href="/register" className="btn bg-pink rounded-full p-2 size-12 flex items-center justify-center">
+      <Link href="/checkout" className="btn bg-pink rounded-full p-2 size-12 flex items-center justify-center">
         <img src="/vector/cart2.png" alt="Cart Icon" width={20} height={20} />
       </Link>
     </>
@@ -59,6 +61,25 @@ function Keranjang(){
 }
 
 function Profile(){
+  const {user, setUser } = useAuth();
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No token available");
+
+      await axios.post("/api/logout", null, {
+          headers: {
+              Authorization: `Bearer ${token}`,
+          },
+      });
+
+      localStorage.removeItem("token");
+      setUser(null);
+      window.location.href = "/login";
+  } catch (error) {
+      console.error("Logout failed:", error);
+  }
+    };
   return(
     <>
       <div className="dropdown dropdown-bottom dropdown-end">
@@ -68,17 +89,19 @@ function Profile(){
                   <div className="rounded-full size-10 bg-gray-200">
                   </div>
                   <div className="flex-col">
-                    <p className="font-semibold text-base">Marcelino</p>
+                    <p className="font-semibold text-base">
+                      {user ? `${user.nama_depan}` : "Loading..."}
+                    </p>
                     <div className="flex flex-row items-center gap-2">
                         <img src="/image/coin.svg" alt="Coin Icon" className="size-5 object-cover"/>
                         <p className="text-base">IDR 0,00</p>
                     </div>
                   </div>
               </div>
-              <Link href="register"  className="bg-white hover:bg-pink hover:text-white rounded-3xl  px-5 py-2  font-semibold transition duration-300  hover:scale-105 mt-4">Riwayat Pembelian</Link>
-              <Link href="register"  className="bg-white hover:bg-pink hover:text-white rounded-3xl  px-5 py-2  font-semibold transition duration-300  hover:scale-105">Pengaturan</Link>
-              <div className="flex justify-between pr-4 bg-white hover:bg-pink hover:text-white rounded-3xl  px-5 py-2  font-semibold transition duration-300  hover:scale-105">
-              <Link href="register"  className="">Keluar</Link>
+              <Link href="/purchasehistory"  className="bg-white hover:bg-pink hover:text-white rounded-3xl  px-5 py-2  font-semibold transition duration-300  hover:scale-105 mt-4">Riwayat Pembelian</Link>
+              <Link href="settings"  className="bg-white hover:bg-pink hover:text-white rounded-3xl  px-5 py-2  font-semibold transition duration-300  hover:scale-105">Pengaturan</Link>
+              <div onClick={handleLogout} className="flex justify-between pr-4 bg-white hover:bg-pink hover:text-white rounded-3xl  px-5 py-2  font-semibold transition duration-300  hover:scale-105">
+                  <span>Logout</span> 
                   <img src="/image/logout.svg" alt="Coin Icon" className="size-4 object-cover"/>
               </div>
             </ul>
@@ -99,7 +122,7 @@ const Navbar = () => {
             className="w-28 -mt-2 transition duration-300 hover:scale-105" 
           />
         </Link>
-        <Link href="register" className="bg-pink rounded-3xl text-white px-5 py-1 min-w-20 font-semibold transition duration-300 hover:scale-105">
+        <Link href="/mitra" className="bg-heading rounded-3xl text-white px-5 py-1 min-w-20 font-semibold transition duration-300 hover:scale-105">
           Mitra
         </Link>
       </div>

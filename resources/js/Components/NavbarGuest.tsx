@@ -26,7 +26,7 @@ const Navbar = () => {
           />
         </Link>
         <Link
-          href="/register"
+          href="/mitra"
           className="bg-heading rounded-3xl text-white px-5 py-1 min-w-20 font-semibold transition duration-300 hover:scale-105"
         >
           Mitra
