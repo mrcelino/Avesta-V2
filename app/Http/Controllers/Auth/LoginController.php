@@ -15,30 +15,6 @@ class LoginController extends Controller
         return Inertia::render('Auth/Login');
     }
 
-    public function authenticate(Request $request)
-    {
-        $credentials = $request->validate([
-            'email' => 'required|email|max:255',
-            'password' => 'required|string|min:8',
-        ]);
-
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-
-            $user = Auth::user();
-
-            $redirectPaths = [
-                'pemilik' => '/mitra',
-                'karyawan' => '/karyawan',
-                'default' => '/dashboard',
-            ];
-
-            return redirect()->intended($redirectPaths[$user->role] ?? $redirectPaths['default']);
-        }
-
-        return back()->withErrors(['email' => 'Email atau password salah.']);
-    }
-
     public function apiLogin(Request $request)
     {
         $credentials = $request->validate([
@@ -69,7 +45,19 @@ class LoginController extends Controller
 
         return response()->json([
             'message' => 'Email atau password salah',
-            'errors' => ['email' => ['Email atau password salah']],
+            'errors' => ['email' => ['Email atau password salahhhhhh']],
         ], 401);
     }
+
+    public function apiLogout(Request $request)
+    {
+    $user = $request->user();
+    
+    if ($user) {
+        $user->tokens()->delete();
+    }
+
+    return response()->json(['message' => 'Logout berhasil'], 200);
+}
+
 }
