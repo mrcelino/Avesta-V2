@@ -38,3 +38,35 @@
 * {
     @apply font-sans;
 }
+
+
+@keyframes marqueeLeft {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marqueeRight {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.marquee-left {
+  display: flex;
+  white-space: nowrap;
+  animation: marqueeLeft 8s linear infinite;
+}
+
+.marquee-right {
+  display: flex;
+  white-space: nowrap;
+  animation: marqueeRight 8s linear infinite;
+}
+
