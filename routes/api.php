@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\UserCheckController;
+use App\Http\Controllers\Api\WarungController;
 
 Route::prefix('auth')->group(function () {
     Route::post('/login', [LoginController::class, 'apiLogin']);
@@ -15,3 +16,6 @@ Route::middleware('auth:sanctum')->post('/logout', [LoginController::class, 'api
 Route::middleware('auth:sanctum')->get('/me', [UserCheckController::class, 'me']);
 
 Route::get('/unggas', [ProductController::class, 'index']);
+Route::get('/warungs', [WarungController::class, 'all']);
+Route::get('/warungs/kelurahan', [WarungController::class, 'getKelurahan']);
+Route::get('/warungs/{id}', [WarungController::class, 'show']);

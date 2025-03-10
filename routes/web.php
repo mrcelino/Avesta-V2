@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\WarungController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
@@ -19,4 +20,7 @@ Route::group([], function () {
     Route::get('/dashboard', fn () => Inertia::render('Buyer/Dashboard'));
     Route::get('/cariayam', fn () => Inertia::render('Buyer/CariAyam'));
     Route::get('/tes', fn () => Inertia::render('Buyer/Tes'));
+    Route::get('/withdraw', fn () => Inertia::render('Buyer/Withdraw'));
+    Route::get('/topup', fn () => Inertia::render('Buyer/Topup'));
+    Route::get('/warungs/{id}', [WarungController::class, 'page'])->name('warungs.show');
 });

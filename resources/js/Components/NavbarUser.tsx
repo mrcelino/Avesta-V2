@@ -26,57 +26,75 @@ function Info(){
 function LocationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [kelurahans, setKelurahans] = useState<string[]>([]);
 
   // Ambil lokasi dari URL saat komponen pertama kali dimuat
   useEffect(() => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const kelurahan = urlParams.get("kelurahan");
-      if (kelurahan) {
-          setSelectedOption(kelurahan);
+    const fetchKelurahans = async () => {
+      // Ambil data kelurahan dari API menggunakan axios
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/api/warungs/kelurahan');
+        // Menyimpan daftar kelurahan ke state
+        setKelurahans(response.data.map((item: { kelurahan: string }) => item.kelurahan));
+      } catch (error) {
+        console.error('Error fetching kelurahan:', error);
       }
+    };
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const kelurahan = urlParams.get("kelurahan");
+    if (kelurahan) {
+      setSelectedOption(kelurahan);
+    }
+
+    fetchKelurahans();
   }, []);
 
   const toggleDropdown = () => {
-      setIsOpen(!isOpen);
+    setIsOpen(!isOpen);
   };
 
   const selectOption = (option: string) => {
-      setSelectedOption(option);
-      setIsOpen(false);
-      // Navigasi ke halaman dengan parameter kelurahan
-      window.location.href = `/cariayam?kelurahan=${encodeURIComponent(option)}`;
+    setSelectedOption(option);
+    setIsOpen(false);
+    // Navigasi ke halaman dengan parameter kelurahan
+    window.location.href = `/cariayam?kelurahan=${encodeURIComponent(option)}`;
   };
 
   return (
-      <div className="flex items-center justify-evenly bg-white rounded-full text-pink px-4">
-          <img src="/image/pin2.png" alt="Location Icon" className="w-6" />
-          <div className="relative max-w-sm">
-              {/* Tombol Trigger Dropdown */}
-              <div
-                  onClick={toggleDropdown}
-                  className="cursor-pointer rounded-full text-pink bg-white font-semibold text-lg p-3 flex justify-between items-center"
-              >
-                  <span>{selectedOption || "Pilih Lokasi"}</span>
-                  <img src="/vector/dropdown.png" alt="Dropdown Icon" className="w-5 ml-4" />
-              </div>
-              {/* Daftar Opsi (Dropdown Menu) */}
-              {isOpen && (
-                  <div className="absolute -ml-12 z-10 mt-2 p-2 w-full min-w-56 bg-white text-black font-medium rounded-[35px] shadow-xl">
-                      <ul className="p-2">
-                          {["Sendangadi", "Sinduadi", "Tirtoadi", "Tlogoadi"].map((option) => (
-                              <li
-                                  key={option}
-                                  onClick={() => selectOption(option)}
-                                  className="p-2 hover:bg-pink hover:text-white rounded-full cursor-pointer transition duration-300 hover:scale-105"
-                              >
-                                  {option}
-                              </li>
-                          ))}
-                      </ul>
-                  </div>
+    <div className="flex items-center justify-evenly bg-white rounded-full text-pink px-4">
+      <img src="/image/pin2.png" alt="Location Icon" className="w-6" />
+      <div className="relative max-w-sm">
+        {/* Tombol Trigger Dropdown */}
+        <div
+          onClick={toggleDropdown}
+          className="cursor-pointer rounded-full text-pink bg-white font-semibold text-lg p-3 flex justify-between items-center"
+        >
+          <span>{selectedOption || "Pilih Lokasi"}</span>
+          <img src="/vector/dropdown.png" alt="Dropdown Icon" className="w-5 ml-4" />
+        </div>
+        {/* Daftar Opsi (Dropdown Menu) */}
+        {isOpen && (
+          <div className="absolute -ml-12 z-10 mt-2 p-2 w-full min-w-56 bg-white text-black font-medium rounded-[35px] shadow-xl">
+            <ul className="p-2">
+              {kelurahans.length > 0 ? (
+                kelurahans.map((option) => (
+                  <li
+                    key={option}
+                    onClick={() => selectOption(option)}
+                    className="p-2 hover:bg-pink hover:text-white rounded-full cursor-pointer transition duration-300 hover:scale-105"
+                  >
+                    {option}
+                  </li>
+                ))
+              ) : (
+                <li className="p-2 text-center">Memuat lokasi...</li>
               )}
+            </ul>
           </div>
+        )}
       </div>
+    </div>
   );
 }
 
