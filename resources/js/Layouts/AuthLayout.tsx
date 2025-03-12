@@ -20,27 +20,24 @@ interface User {
 interface AuthContextType {
   user: User | null;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
-  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   setUser: () => {},
-  loading: true
 });
 
 export const useAuth = () => useContext(AuthContext);
 
 const AuthLayout: React.FC<PropsWithChildren<AuthLayoutProps>> = ({ children, useDashboardNavbar = false }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) throw new Error("No token available");
-    
+
         const response = await axios.get("/api/me", {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -51,17 +48,15 @@ const AuthLayout: React.FC<PropsWithChildren<AuthLayoutProps>> = ({ children, us
       } catch (error) {
         console.error("Failed to fetch user:", error);
         setUser(null);
-      } finally {
-        setLoading(false);
       }
     };
     fetchUser();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, setUser, loading }}> {/* Tambahkan setUser */}
+    <AuthContext.Provider value={{ user, setUser }}>
       {useDashboardNavbar ? <Navbar /> : <NavbarUser />}
-      <main>{loading ? <p>Loading...</p> : children}</main>
+      <main>{children}</main> {/* Langsung render children */}
       <Footer />
     </AuthContext.Provider>
   );
