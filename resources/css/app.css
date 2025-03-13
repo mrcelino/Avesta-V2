@@ -17,6 +17,28 @@
   --color-c-input: #f4f4f4;
 }
 
+/* Pastikan lebar halaman konstan */
+html, body {
+  width: 100%;
+  overflow-x: hidden; /* Hindari horizontal scroll */
+}
+
+/* Saat modal aktif, hilangkan scrollbar tanpa geser layout */
+body.modal-active {
+  overflow-y: hidden;
+  padding-right: 0; /* Hindari padding tambahan dari scrollbar */
+}
+
+/* Stabilkan navbar */
+.navbar {
+  width: 100vw; /* Gunakan viewport width untuk konsistensi */
+  box-sizing: border-box; /* Pastikan padding tidak ubah lebar */
+}
+
+body.modal-active {
+  overflow: hidden;
+}
+
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still
