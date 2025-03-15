@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useForm, Link } from "@inertiajs/react";
 import { FormEvent } from "react";
+import axios from "axios";
 
 type Errors = {
     email?: string[];
@@ -19,44 +20,39 @@ const Login = ({ errors }: { errors: Errors }) => {
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setProcessing(true);
-    
+
         try {
-            const response = await fetch("/api/auth/login", {
-                method: "POST",
+            console.log("Fetching CSRF cookie...");
+            await axios.get('/sanctum/csrf-cookie', { withCredentials: true });
+            console.log("CSRF cookie fetched");
+
+            console.log("Posting login data:", data);
+            const response = await axios.post("/api/auth/login", data, {
                 headers: {
                     "Content-Type": "application/json",
+                    "Accept": "application/json",
                 },
-                credentials: "include",
-                body: JSON.stringify(data),
+                withCredentials: true, // Pastiin cookie ikut
             });
-    
-            const result = await response.json();
-    
-            if (!response.ok) {
-                throw result;
-            }
-    
-            const { user, token } = result; // Ambil token dari respons
-    
-            if (token) {
-                localStorage.setItem("token", token); // Simpan token ke localStorage
-            }
-    
-            // ✅ Redirect berdasarkan role
+
+            console.log("Login response:", response.data);
+
+            const { user } = response.data;
+
             const redirectPaths: Record<string, string> = {
                 pemilik: "/mitra",
                 karyawan: "/karyawan",
                 default: "/dashboard",
             };
-    
+
             window.location.href = redirectPaths[user.role] ?? redirectPaths.default;
         } catch (error: any) {
-            setApiErrors(error.errors || {});
+            console.error("Login error:", error.response?.data || error);
+            setApiErrors(error.response?.data.errors || {});
         } finally {
             setProcessing(false);
         }
     };
-    
 
     return (
         <div
