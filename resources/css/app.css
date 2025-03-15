@@ -18,21 +18,21 @@
 }
 
 /* Pastikan lebar halaman konstan */
-html, body {
+/* html, body {
   width: 100%;
-  overflow-x: hidden; /* Hindari horizontal scroll */
-}
+  overflow-x: hidden;
+} */
 
 /* Saat modal aktif, hilangkan scrollbar tanpa geser layout */
-body.modal-active {
+/* body.modal-active {
   overflow-y: hidden;
-  padding-right: 0; /* Hindari padding tambahan dari scrollbar */
-}
+  padding-right: 0; 
+} */
 
 /* Stabilkan navbar */
 .navbar {
-  width: 100vw; /* Gunakan viewport width untuk konsistensi */
-  box-sizing: border-box; /* Pastikan padding tidak ubah lebar */
+  width: 99vw;
+  box-sizing: border-box;
 }
 
 body.modal-active {
