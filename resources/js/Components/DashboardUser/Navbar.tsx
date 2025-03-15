@@ -2,8 +2,9 @@ import axios from 'axios';
 import React from "react";
 import { Link } from '@inertiajs/react';
 import { useState } from "react";
+import { useCart } from "@/Layouts/AuthLayout";
 import { useAuth } from '@/Layouts/AuthLayout';
-
+import { formatIDR } from '../NavbarUser';
 function LocationDropdown() {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -51,35 +52,34 @@ function LocationDropdown() {
 }
 
 function Keranjang(){
+    const { cart } = useCart();
+    const itemCount = cart.length;
   return(
     <>
-      <Link href="/checkout" className="btn bg-pink rounded-full p-2 size-12 flex items-center justify-center">
+      <Link href="/checkout" className="relative btn bg-pink rounded-full p-2 size-12 flex items-center justify-center">
         <img src="/vector/cart2.png" alt="Cart Icon" width={20} height={20} />
+          <div className={`absolute rounded-full bg-pink top-0 right-0 translate-x-1/4 -translate-y-1/4 text-xs flex items-center justify-center text-white ${itemCount > 9 ? "size-6" : "size-5"}`}>
+          {itemCount > 99 ? "99+" : itemCount}
+          </div>
       </Link>
     </>
   )
 }
 
 function Profile(){
-  const {user, setUser } = useAuth();
+  const { user, setUser } = useAuth();
+
   const handleLogout = async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No token available");
-
-      await axios.post("/api/logout", null, {
-          headers: {
-              Authorization: `Bearer ${token}`,
-          },
-      });
-
-      localStorage.removeItem("token");
-      setUser(null);
-      window.location.href = "/login";
-  } catch (error) {
-      console.error("Logout failed:", error);
-  }
-    };
+        await axios.post("/api/logout", {}, {
+            withCredentials: true, // Pake session cookie
+        });
+        setUser(null);
+        window.location.href = "/login";
+    } catch (error) {
+        console.error("Logout failed:", error);
+    }
+  };
   return(
     <>
       <div className="dropdown dropdown-bottom dropdown-end">
@@ -92,10 +92,10 @@ function Profile(){
                     <p className="font-semibold text-base">
                       {user ? `${user.nama_depan}` : "Loading..."}
                     </p>
-                    <div className="flex flex-row items-center gap-2">
-                        <img src="/image/coin.svg" alt="Coin Icon" className="size-5 object-cover"/>
-                        <p className="text-base">IDR 0,00</p>
-                    </div>
+                    <Link href="/wallet" className="flex flex-row items-center gap-2">
+                      <img src="/image/coin.svg" alt="Coin Icon" className="size-5 object-cover" />
+                      <p className="text-base">{user ? formatIDR(user.saldo) : "Rp 0,00"}</p>
+                    </Link>
                   </div>
               </div>
               <Link href="/purchasehistory"  className="bg-white hover:bg-pink hover:text-white rounded-3xl  px-5 py-2  font-semibold transition duration-300  hover:scale-105 mt-4">Riwayat Pembelian</Link>

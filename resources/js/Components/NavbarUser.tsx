@@ -2,7 +2,15 @@ import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { Link } from "@inertiajs/react";
 import { useAuth } from "@/Layouts/AuthLayout";
+import { useCart } from "@/Layouts/AuthLayout";
 
+export const formatIDR = (amount: string | number) => {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 2,
+  }).format(Number(amount));
+};
 export default function Navbar() {
   return (
     <div className="navbar fixed top-0 left-0 w-full z-50 bg-pink p-3 shadow-sm flex items-center justify-between">
@@ -27,7 +35,7 @@ export default function Navbar() {
 function Info() {
   return (
     <>
-      <Link href="/" className="pl-4">
+      <Link href="/dashboard" className="pl-4">
         <img
           src="/image/avesta2.png"
           alt="Avesta Logo"
@@ -110,9 +118,14 @@ function LocationDropdown() {
 }
 
 function Keranjang() {
+  const { cart } = useCart();
+  const itemCount = cart.length;
   return (
-    <Link href="/checkout" className="btn rounded-full p-2 size-12 flex items-center justify-center">
+    <Link href="/checkout" className="relative btn rounded-full p-2 size-12 flex items-center justify-center">
       <img src="/vector/cart.png" alt="Cart Icon" width={20} height={20} />
+      <div className={`absolute rounded-full bg-white top-0 right-0 translate-x-1/4 -translate-y-1/4 text-xs flex items-center justify-center ${itemCount > 9 ? "size-6" : "size-5"}`}>
+        {itemCount > 99 ? "99+" : itemCount}
+      </div>
     </Link>
   );
 }
@@ -122,18 +135,13 @@ function Profile() {
 
   const handleLogout = async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No token available");
-
-      await axios.post("/api/logout", null, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      localStorage.removeItem("token");
-      setUser(null);
-      window.location.href = "/login";
+        await axios.post("/api/logout", {}, {
+            withCredentials: true,
+        });
+        setUser(null);
+        window.location.href = "/login";
     } catch (error) {
-      console.error("Logout failed:", error);
+        console.error("Logout failed:", error);
     }
   };
 
@@ -154,10 +162,10 @@ function Profile() {
             <p className="font-semibold text-base">
               {user ? `${user.nama_depan}` : "Loading..."}
             </p>
-            <div className="flex flex-row items-center gap-2">
+            <Link href="/wallet" className="flex flex-row items-center gap-2">
               <img src="/image/coin.svg" alt="Coin Icon" className="size-5 object-cover" />
-              <p className="text-base">IDR 0,00</p>
-            </div>
+              <p className="text-base">{user ? formatIDR(user.saldo) : "Rp 0,00"}</p>
+            </Link>
           </div>
         </div>
         <Link
