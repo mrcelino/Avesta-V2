@@ -17,5 +17,10 @@ class Unggas extends Model
     {
         return $this->belongsTo(Warung::class, 'id_warung', 'id_warung');
     }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class, 'id_unggas', 'id_unggas');
+    }
     
 }

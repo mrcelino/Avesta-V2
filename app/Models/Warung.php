@@ -25,7 +25,7 @@ class Warung extends Model
     
     public function orders()
     {
-        return $this->hasMany(Order::class, 'id_warung', 'id');
+        return $this->hasMany(Order::class, 'id_warung', 'id_warung');
     }
     
     public function unggas()
