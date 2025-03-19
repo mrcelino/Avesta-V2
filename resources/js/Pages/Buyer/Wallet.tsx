@@ -28,7 +28,7 @@ interface HistoryPayment {
 
 // Komponen Anak untuk Konten Wallet
 const WalletContent: React.FC = () => {
-    const { user} = useAuth(); // Ambil user dan isReady dari context
+    const { user} = useAuth(); // Ambil user dari context
     const [history, setHistory] = useState<HistoryPayment[]>([]);
 
     useEffect(() => {
