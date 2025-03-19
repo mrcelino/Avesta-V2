@@ -21,6 +21,7 @@ interface User {
   nama_belakang: string;
   email: string;
   role: string;
+  password: string;
   saldo: string;
 }
 
@@ -50,7 +51,7 @@ export interface CartItem extends Product {
 interface AuthContextType {
   user: User | null;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
-  loading: boolean; // Tambah loading state
+  loading: boolean;
 }
 
 interface CartContextType {
@@ -59,9 +60,11 @@ interface CartContextType {
   updateQuantity: (id_unggas: number, quantity: number) => void;
   removeFromCart: (id_unggas: number) => void;
   setNote: (id_unggas: number, note: string) => void;
-  showAlert: boolean;
-  setShowAlert: (value: boolean) => void;
   clearCart: () => void;
+  cartTotal: string; // Tambah cartTotal
+  showSwitchStoreModal: boolean;
+  setShowSwitchStoreModal: (value: boolean) => void;
+  checkStoreMatch: (product: Product) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -87,21 +90,24 @@ const CartProvider: React.FC<PropsWithChildren> = ({ children }) => {
       const savedCart = localStorage.getItem("cart");
       return savedCart ? JSON.parse(savedCart) : [];
   });
-  const [showAlert, setShowAlert] = useState(false);
+  const [showSwitchStoreModal, setShowSwitchStoreModal] = useState(false);
 
+  // Fungsi untuk cek apakah warung sama dengan yang ada di keranjang
+  const checkStoreMatch = (product: Product) => {
+    if (cart.length === 0) {
+      return true; // Kalo keranjang kosong, anggap match
+    }
+    const currentStoreId = cart[0].warung.id_warung;
+    return currentStoreId === product.warung.id_warung;
+  };
+  
+  // Hitung total belanjaan
+  const cartTotal = cart.reduce((total, item) => total + parseFloat(item.harga_per_kg) * item.quantity, 0).toFixed(2);
   useEffect(() => {
       localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
   const addToCart = (product: Product, quantity = 1): boolean => {
-      if (cart.length > 0) {
-          const currentWarungId = cart[0].warung.id_warung;
-          if (product.warung.id_warung !== currentWarungId) {
-              setShowAlert(true);
-              setTimeout(() => setShowAlert(false), 5000);
-              return false;
-          }
-      }
       setCart((prevCart) => {
           const existingItem = prevCart.find((item) => item.id_unggas === product.id_unggas);
           if (existingItem) {
@@ -145,14 +151,16 @@ const CartProvider: React.FC<PropsWithChildren> = ({ children }) => {
   return (
       <CartContext.Provider
           value={{
-              cart,
-              addToCart,
-              updateQuantity,
-              removeFromCart,
-              setNote,
-              showAlert,
-              setShowAlert,
-              clearCart,
+            cart,
+            addToCart,
+            updateQuantity,
+            removeFromCart,
+            setNote,
+            clearCart,
+            cartTotal,
+            showSwitchStoreModal,
+            setShowSwitchStoreModal,
+            checkStoreMatch,
           }}
       >
           {children}
@@ -215,13 +223,13 @@ const AuthLayout: React.FC<PropsWithChildren<AuthLayoutProps>> = ({
         );
     }
   return (
-      <AuthContext.Provider value={{ user, setUser, loading }}>
+      <AuthContext.Provider value={{ user, setUser, loading}}>
           <CartProvider>
-                  <>
-                      {useDashboardNavbar ? <Navbar /> : <NavbarUser />}
-                      <main>{children}</main>
-                      <Footer />
-                  </>
+                <>
+                    {useDashboardNavbar ? <Navbar /> : <NavbarUser />}
+                    <main>{children}</main>
+                    <Footer />
+                </>
           </CartProvider>
       </AuthContext.Provider>
   );
