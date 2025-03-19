@@ -44,6 +44,6 @@ class HistoryPayment extends Model
     // Relasi ke Payment (jika ada tabel payments)
     public function payment()
     {
-        // return $this->belongsTo(Payment::class, 'id_payment');
+        return $this->belongsTo(Payment::class, 'id_payment');
     }
 }
