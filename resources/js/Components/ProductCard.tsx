@@ -1,5 +1,6 @@
 import { Link } from "@inertiajs/react";
 import { useState, useEffect } from "react";
+import { useCart } from "@/Layouts/AuthLayout";
 
 interface Product {
   id_unggas: number;
@@ -15,22 +16,30 @@ interface Product {
     nama_warung: string;
     alamat_warung: string;
     kelurahan: string;
+    foto_warung: string;
   };
 }
 
 const ProductCard = ({ product }: { product: Product }) => {
+  const [quantity, setQuantity] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { addToCart, showSwitchStoreModal, setShowSwitchStoreModal, clearCart, checkStoreMatch } = useCart();
 
   useEffect(() => {
-    if (isModalOpen) {
+    if (showSwitchStoreModal) {
+      setIsModalOpen(false);
+    }
+
+    if (isModalOpen || showSwitchStoreModal) {
       document.body.classList.add("modal-active");
     } else {
       document.body.classList.remove("modal-active");
     }
+
     return () => {
       document.body.classList.remove("modal-active");
     };
-  }, [isModalOpen]);
+  }, [isModalOpen, showSwitchStoreModal]);
 
   const formatPrice = (price: string) => {
     const numPrice = parseFloat(price);
@@ -40,9 +49,28 @@ const ProductCard = ({ product }: { product: Product }) => {
     })}`;
   };
 
+  const handleIncrease = () => setQuantity(quantity + 1);
+  const handleDecrease = () => setQuantity(Math.max(1, quantity - 1));
+
   const handleAddToCart = () => {
-    console.log(`Added product ${product.id_unggas} to cart`);
+    addToCart(product, quantity);
+    setQuantity(1);
     setIsModalOpen(false);
+  };
+
+  const handleClearCartAndAdd = () => {
+    clearCart();
+    setShowSwitchStoreModal(false);
+    setIsModalOpen(true);
+  };
+
+  const handleOrderClick = () => {
+    const isStoreMatch = checkStoreMatch(product);
+    if (isStoreMatch) {
+      setIsModalOpen(true);
+    } else {
+      setShowSwitchStoreModal(true);
+    }
   };
 
   return (
@@ -56,7 +84,7 @@ const ProductCard = ({ product }: { product: Product }) => {
           width="600"
         />
         <div className="py-2">
-          <h2 className="text-base font-medium">{product.jenis_unggas}</h2>
+          <h3 className="text-base font-medium">{product.jenis_unggas}</h3>
           <p className="text-lg font-semibold">{formatPrice(product.harga_per_kg)}</p>
           {product.warung ? (
             <Link href={`/warungs/${product.warung.id_warung}`} className="text-sm">
@@ -77,7 +105,7 @@ const ProductCard = ({ product }: { product: Product }) => {
           <div className="flex items-center justify-between mt-4">
             <button
               className="bg-pink w-full text-white px-4 py-2 rounded-2xl font-semibold hover:bg-pink"
-              onClick={() => setIsModalOpen(true)}
+              onClick={handleOrderClick}
             >
               Pesan
             </button>
@@ -85,43 +113,60 @@ const ProductCard = ({ product }: { product: Product }) => {
         </div>
       </div>
 
+      {/* Modal Detail Produk */}
       {isModalOpen && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-3xl p-6">
+        <div className="modal modal-open z-50">
+          <div className="modal-box max-w-3xl p-6 bg-white shadow-lg">
             <button
               className="btn btn-sm btn-circle text-xl btn-ghost absolute right-2 top-2 text-pink"
               onClick={() => setIsModalOpen(false)}
             >
               ✕
             </button>
-            <h3 className="text-lg font-bold mb-2">Detail Produk</h3>
+            <h3 className="text-lg font-semibold mb-2">Detail Produk</h3>
             <div className="flex border-2 border-slate-200 rounded-2xl p-4">
               <div className="w-1/2">
                 <img
                   alt={`Image of ${product.jenis_unggas}`}
-                  className="w-full h-full rounded-lg object-cover"
+                  className="w-full h-full rounded-xl object-cover"
                   src={`/storage/${product.foto_unggas}`}
                 />
               </div>
               <div className="ml-4 w-1/2 flex flex-col justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold mb-2">{product.jenis_unggas}</h2>
+                  <h3 className="text-lg font-semibold mb-2">{product.jenis_unggas}</h3>
                   <p className="font-normal">{product.deskripsi}</p>
                   <p className="text-xl font-semibold mt-2 mb-2">
                     {formatPrice(product.harga_per_kg)}
                   </p>
                   <p>{product.warung.nama_warung}</p>
                   <div className="flex items-center mt-1">
-                    <i className="fas fa-map-marker-alt text-pink mr-1"></i>
                     <span className="font-semibold">
-                      0.28 km {product.penjualan} Terjual
+                      {product.penjualan} Terjual
                     </span>
                   </div>
                   <p className="mt-1">Stok: {product.stok}</p>
+                  <div className="flex flex-row space-x-2 mt-2 mb-4">
+                    <div
+                      onClick={handleDecrease}
+                      className="flex items-center justify-center rounded-lg border-2 size-8 text-xl text-gray-400 cursor-pointer"
+                    >
+                      -
+                    </div>
+                    <div className="flex grow items-center justify-center rounded-lg border-2 size-8 text-base">
+                      {quantity}
+                    </div>
+                    <div
+                      onClick={handleIncrease}
+                      className="flex items-center justify-center rounded-lg border-2 size-8 text-xl text-gray-400 cursor-pointer"
+                    >
+                      +
+                    </div>
+                  </div>
                 </div>
                 <button
                   onClick={handleAddToCart}
-                  className="bg-pink text-white w-full py-2 font-semibold rounded-2xl mt-4"
+                  className="bg-pink text-white w-full py-2 font-semibold rounded-xl"
                 >
                   Tambah ke keranjang
                 </button>
@@ -129,6 +174,47 @@ const ProductCard = ({ product }: { product: Product }) => {
             </div>
           </div>
           <div className="modal-backdrop" onClick={() => setIsModalOpen(false)}></div>
+        </div>
+      )}
+
+      {/* Modal Konfirmasi Ganti Toko (Custom) */}
+      {showSwitchStoreModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop dengan blur */}
+          <div
+            className="absolute inset-0 bg-black/5"
+            onClick={() => setShowSwitchStoreModal(false)}
+          ></div>
+          {/* Modal Content */}
+          <div className="flex flex-col gap-4 items-center justify-center relative bg-white rounded-3xl max-w-xl  w-full p-6 shadow-lg">
+            <button
+              className="btn btn-circle text-xl btn-ghost absolute right-2 top-2 text-pink"
+              onClick={() => setShowSwitchStoreModal(false)}
+            >
+              ✕
+            </button>
+            <h3 className="text-xl font-semibold mb-4 text-gray-800 mt-4">
+              Apakah Anda ingin beralih ke toko ini?
+            </h3>
+            <img src="/image/moveToko.png" alt="Avesta Logo" className="w-80"></img>
+            <h3 className="flex text-sm text-center max-w-md mt-4">
+              Jika ya, kami akan menyesuaikan pesanan dengan menghapus produk sebelumnya. Mohon konfirmasinya
+            </h3>
+            <div className="flex w-full justify-between space-x-2">
+                <button
+                  onClick={() => setShowSwitchStoreModal(false)}
+                  className="btn btn-sm btn-outline w-1/2 text-pink hover:bg-gray-100 rounded-xl border-pink border-2"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={handleClearCartAndAdd}
+                  className="btn btn-sm w-1/2 bg-pink text-white hover:bg-pink rounded-xl"
+                >
+                  Konfirmasi
+                </button>
+              </div>
+          </div>
         </div>
       )}
     </>

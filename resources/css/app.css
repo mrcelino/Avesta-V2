@@ -39,6 +39,16 @@ body.modal-active {
   overflow: hidden;
 }
 
+/* Untuk semua browser */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still
@@ -49,9 +59,6 @@ body.modal-active {
 */
 @layer base {
   *,
-  ::after,
-  ::before,
-  ::backdrop,
   ::file-selector-button {
     border-color: var(--color-gray-200, currentColor);
   }
