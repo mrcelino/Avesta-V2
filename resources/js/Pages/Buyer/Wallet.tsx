@@ -98,6 +98,8 @@ const WalletContent: React.FC = () => {
                                                 ? "Topup"
                                                 : transaction.tipe_transaksi === "penarikan"
                                                 ? "Withdraw"
+                                                : transaction.tipe_transaksi === "refund"
+                                                ? "Pembatalan Pesanan"
                                                 : "Pembayaran"}
                                         </h2>
                                         <h2 className="text-[#B7B6B6] font-semibold text-sm">
@@ -109,14 +111,14 @@ const WalletContent: React.FC = () => {
                                     </div>
                                     <h2
                                         className={`font-medium ${
-                                            transaction.tipe_transaksi === "top-up"
+                                            transaction.tipe_transaksi === "top-up" || transaction.tipe_transaksi === "refund"
                                                 ? "text-[#30B666]"
                                                 : "text-red-500"
                                         }`}
                                     >
-                                        {transaction.tipe_transaksi === "top-up"
-                                            ? `+${formatIDR(transaction.wallet_payment)}`
-                                            : `-${formatIDR(transaction.wallet_payment)}`}
+                                    {transaction.tipe_transaksi === "top-up" || transaction.tipe_transaksi === "refund"
+                                        ? `+${formatIDR(transaction.wallet_payment)}` 
+                                        : `-${formatIDR(transaction.wallet_payment)}`} 
                                     </h2>
                                 </div>
                             ))
