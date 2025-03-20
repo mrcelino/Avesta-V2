@@ -19,7 +19,7 @@ class HistoryPayment extends Model
         'id_payment',
         'tanggal_history',
         'wallet_payment',
-        'status_history',
+        // 'status_history',
         'tipe_transaksi'
     ];
 

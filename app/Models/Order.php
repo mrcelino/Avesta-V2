@@ -12,20 +12,7 @@ class Order extends Model
     protected $fillable = [
         'id_user', 'tanggal_order', 'total_harga', 'status_order', 'product_name', 'catatan', 'jumlah_kg', 'id_warung', 'foto_order'
     ];
-        // Accessor untuk is_completed
-    public function getIsCompletedAttribute()
-    {
-        return $this->status_order === 'completed';
-    }
 
-    // Mutator untuk is_completed
-    public function setIsCompletedAttribute($value)
-    {
-        $this->attributes['status_order'] = $value ? 'completed' : 'processed';
-    }
-    protected $casts = [
-        'status_order' => 'string',
-    ];
     protected $primaryKey = 'id_order';
 
     // Jika primary key bukan auto-increment, tambahkan ini
@@ -43,5 +30,25 @@ class Order extends Model
     public function warung()
     {
         return $this->belongsTo(Warung::class, 'id_warung', 'id_warung');
+    }
+
+    public function payment()
+    {
+        return $this->hasOne(Payment::class, 'id_order', 'id_order');
+    }
+    
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($order) {
+            // Buat payment otomatis
+            Payment::create([
+                'id_order' => $order->id_order,
+                'total_payment' => $order->total_harga,
+                'waktu_payment' => now(),
+            ]);
+        });
     }
 }
