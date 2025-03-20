@@ -27,7 +27,7 @@ class TopupController extends Controller
         // Buat entri di history_payment
         HistoryPayment::create([
             'tanggal_history' => now(), // Waktu sekarang
-            'status_history' => 'completed', // Otomatis completed
+            // 'status_history' => 'completed', // Otomatis completed
             'tipe_transaksi' => 'top-up', // Tipe top-up
             'wallet_payment' => $request->amount, // Jumlah top-up
             'id_user' => $user->id_user, // ID user dari request (sesuaikan nama kolom)

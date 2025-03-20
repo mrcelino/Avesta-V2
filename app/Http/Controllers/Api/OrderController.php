@@ -126,15 +126,20 @@ class OrderController extends Controller
 
             // Commit transaksi
             DB::commit();
-
+            
+            // Load relasi payment untuk ambil id_payment
+            $order->load('payment');
+             
             Log::info('Order created successfully', [
                 'id_order' => $order->id_order,
                 'user_id' => $user->id_user,
+                'id_payment' => $order->payment ? $order->payment->id_payment : null,
             ]);
 
             return response()->json([
                 'success' => true,
                 'id_order' => $order->id_order,
+                'id_payment' => $order->payment ? $order->payment->id_payment : null, // Tambah id_payment di response
                 'message' => 'Order and items created successfully',
             ], 201);
 
@@ -170,7 +175,7 @@ class OrderController extends Controller
             $userId = Auth::id();
 
             // Ambil semua order user beserta order_items, unggas, dan warung
-            $orders = Order::with(['orderItems', 'orderItems.unggas', 'warung'])
+            $orders = Order::with(['orderItems', 'orderItems.unggas', 'warung', 'payment'])
                 ->where('id_user', $userId)
                 ->get();
 
@@ -186,6 +191,7 @@ class OrderController extends Controller
                         'id_order' => $order->id_order,
                         'id_user' => $order->id_user,
                         'id_warung' => $order->id_warung,
+                        'id_payment' => $order->payment ? $order->payment->id_payment : null, // Tambah id_payment
                         'nama_warung' => $order->warung ? $order->warung->nama_warung : null,
                         'alamat_warung' => $order->warung ? $order->warung->alamat_warung : null,
                         'tanggal_order' => $order->tanggal_order,

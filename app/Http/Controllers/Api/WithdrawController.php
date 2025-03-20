@@ -38,7 +38,7 @@ class WithdrawController extends Controller
         // Buat entri di history_payment
         HistoryPayment::create([
           'tanggal_history' => now(), // Waktu sekarang
-          'status_history' => 'completed', // Otomatis completed
+        //   'status_history' => 'completed', // Otomatis completed
           'tipe_transaksi' => 'penarikan', // Tipe withdraw
           'id_user' => $user->id_user, // Sesuaikan nama kolom id user
           'wallet_payment' => $amount, // Nominal yang ditarik
