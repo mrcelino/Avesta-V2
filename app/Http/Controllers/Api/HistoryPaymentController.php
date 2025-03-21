@@ -26,4 +26,31 @@ class HistoryPaymentController extends Controller
             'data' => $history,
         ], 200);
     }
+
+    public function store(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'id_user' => 'required|exists:users,id_user',
+                'id_order' => 'required|exists:orders,id_order',
+                'id_payment' => 'nullable|exists:payments,id_payment',
+                'tanggal_history' => 'required|date',
+                'tipe_transaksi' => 'required|in:pembayaran,refund',
+                'wallet_payment' => 'required|numeric|min:0',
+            ]);
+
+            $history = HistoryPayment::create($validated);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'History payment created successfully',
+                'data' => $history,
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create history payment: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }

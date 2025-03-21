@@ -308,4 +308,31 @@ class OrderController extends Controller
             ], 500);
         }
     }
+
+
+    public function cancelOrder(Request $request, $id)
+    {
+    try {
+        $order = Order::findOrFail($id);
+        if ($order->status_order !== 'processed') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hanya order dengan status processed yang bisa dibatalkan',
+            ], 400);
+        }
+
+        $order->status_order = 'canceled';
+        $order->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Order berhasil dibatalkan',
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal membatalkan order: ' . $e->getMessage(),
+        ], 500);
+    }
+}
 }
