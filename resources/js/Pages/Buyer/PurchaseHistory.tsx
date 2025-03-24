@@ -203,6 +203,7 @@ function CancelModal({
   const [cancelReason, setCancelReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -223,19 +224,19 @@ function CancelModal({
 
     try {
       // 1. Update status order jadi canceled
-      const cancelResponse = await axios.patch(
+      await axios.patch(
         `/api/orders/${order.id_order}/cancel`,
         {
           status_order: "canceled",
           cancel_reason: cancelReason || null,
         },
         {
-          withCredentials: true, // Kirim cookie session
+          withCredentials: true,
         }
       );
 
       // 2. Buat record baru di HistoryPayment
-      const historyResponse = await axios.post(
+      await axios.post(
         "/api/history",
         {
           id_user: order.id_user,
@@ -246,16 +247,14 @@ function CancelModal({
           wallet_payment: order.total_harga,
         },
         {
-          withCredentials: true, // Kirim cookie session
+          withCredentials: true,
         }
       );
 
-      // 3. Refresh data dan tutup modal
-      onOrderUpdated();
-      onClose();
+      // 3. Tampilkan modal konfirmasi
+      setShowSuccessModal(true);
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
-        // Error dari server (misalnya 401, 500, dll.)
         setError(err.response.data.message || "Terjadi kesalahan saat membatalkan order");
       } else {
         setError("Terjadi kesalahan saat membatalkan order");
@@ -265,82 +264,111 @@ function CancelModal({
     }
   };
 
+  const handleSuccessModalClose = () => {
+    setShowSuccessModal(false);
+    onOrderUpdated(); // Refresh data
+    onClose(); // Tutup CancelModal
+  };
+
   return (
-    <dialog open className="modal bg-black/40">
-      <div className="modal-box max-w-5xl rounded-3xl">
-        <button
-          className="btn btn-lg btn-circle btn-ghost absolute right-1 top-1 text-pink text-2xl"
-          onClick={onClose}
-        >
-          ✕
-        </button>
-        <h3 className="text-xl font-bold mb-2">Pembatalan Transaksi</h3>
-        <div className="bg-[#FFE5E9] rounded-2xl min-h-44 p-4">
-          <h3 className="text-lg font-semibold mb-2">
-            {getStatusLabel(order.status_order)}
-          </h3>
-          <div className="flex bg-white border min-h-16 rounded-2xl mb-2 p-2">
-            <div className="flex-1 text-left">
-              <h3 className="font-medium">Nomor Invoice</h3>
-              <h3 className="font-medium">Tanggal Pembelian</h3>
-            </div>
-            <div className="text-right">
-              <p>INV{order.id_order.toString().padStart(6, "0")}</p>
-              <p>{order.tanggal_order}</p>
-            </div>
-          </div>
-          <h3 className="text-lg font-semibold mb-2">Detail Produk</h3>
-          <div className="bg-white border rounded-2xl mb-2 max-h-40 overflow-y-scroll">
-            {order.order_items.map((item) => (
-              <div key={item.id_order_item} className="flex items-center p-2 border-b last:border-b-0">
-                <img
-                  src={`/storage/${item.foto_unggas}`}
-                  className="w-28 h-full rounded-md object-cover"
-                  alt={item.jenis_unggas}
-                />
-                <div className="ml-4 flex-1">
-                  <h3 className="font-semibold">
-                    {item.jenis_unggas} {parseFloat(item.jumlah_kg)}kg
-                  </h3>
-                  <p>
-                    {parseFloat(item.jumlah_kg)} x Rp.{" "}
-                    {parseFloat(item.harga_per_kg).toLocaleString("id-ID")}
-                  </p>
-                  <p>{order.nama_warung}</p>
-                  {item.catatan && <p className="text-sm text-gray-600">Catatan: {item.catatan}</p>}
+    <>
+      {/* Modal Pembatalan - Hanya muncul kalo showSuccessModal false */}
+      {!showSuccessModal && (
+        <dialog open className="modal bg-black/40">
+          <div className="modal-box max-w-5xl rounded-3xl">
+            <button
+              className="btn btn-lg btn-circle btn-ghost absolute right-1 top-1 text-pink text-2xl"
+              onClick={onClose}
+            >
+              ✕
+            </button>
+            <h3 className="text-xl font-bold mb-2">Pembatalan Transaksi</h3>
+            <div className="bg-[#FFE5E9] rounded-2xl min-h-44 p-4">
+              <h3 className="text-lg font-semibold mb-2">
+                {getStatusLabel(order.status_order)}
+              </h3>
+              <div className="flex bg-white border min-h-16 rounded-2xl mb-2 p-2">
+                <div className="flex-1 text-left">
+                  <h3 className="font-medium">Nomor Invoice</h3>
+                  <h3 className="font-medium">Tanggal Pembelian</h3>
                 </div>
-                <div className="text-right flex flex-col items-end mr-2">
-                  <p className="mt-4">Total</p>
-                  <p className="text-lg font-semibold">
-                    Rp. {parseFloat(item.harga_total_per_item).toLocaleString("id-ID")}
-                  </p>
+                <div className="text-right">
+                  <p>INV{order.id_order.toString().padStart(6, "0")}</p>
+                  <p>{order.tanggal_order}</p>
                 </div>
               </div>
-            ))}
+              <h3 className="text-lg font-semibold mb-2">Detail Produk</h3>
+              <div className="bg-white border rounded-2xl mb-2 max-h-40 overflow-y-scroll">
+                {order.order_items.map((item) => (
+                  <div key={item.id_order_item} className="flex items-center p-2 border-b last:border-b-0">
+                    <img
+                      src={`/storage/${item.foto_unggas}`}
+                      className="w-28 h-full rounded-md object-cover"
+                      alt={item.jenis_unggas}
+                    />
+                    <div className="ml-4 flex-1">
+                      <h3 className="font-semibold">
+                        {item.jenis_unggas} {parseFloat(item.jumlah_kg)}kg
+                      </h3>
+                      <p>
+                        {parseFloat(item.jumlah_kg)} x Rp.{" "}
+                        {parseFloat(item.harga_per_kg).toLocaleString("id-ID")}
+                      </p>
+                      <p>{order.nama_warung}</p>
+                      {item.catatan && <p className="text-sm text-gray-600">Catatan: {item.catatan}</p>}
+                    </div>
+                    <div className="text-right flex flex-col items-end mr-2">
+                      <p className="mt-4">Total</p>
+                      <p className="text-lg font-semibold">
+                        Rp. {parseFloat(item.harga_total_per_item).toLocaleString("id-ID")}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Alasan Pembatalan</h3>
+              <div className="bg-white border min-h-16 rounded-2xl mb-2 p-2">
+                <textarea
+                  className="w-full p-2 rounded-xl border-0 focus:border-pink focus:ring-2 focus:ring-pink outline-none resize-none"
+                  placeholder="Masukkan alasan pembatalan..."
+                  rows={3}
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                />
+              </div>
+              {error && <p className="text-red-500 mb-2">{error}</p>}
+              <div className="flex justify-end mt-4">
+                <button
+                  className="btn bg-pink text-white px-4 py-1 rounded-lg font-semibold hover:scale-105 transition duration-300"
+                  onClick={handleCancelOrder}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Memproses..." : "Ajukan Pembatalan"}
+                </button>
+              </div>
+            </div>
           </div>
-          <h3 className="text-lg font-semibold mb-2">Alasan Pembatalan</h3>
-          <div className="bg-white border min-h-16 rounded-2xl mb-2 p-2">
-            <textarea
-              className="w-full p-2 rounded-xl border-0 focus:border-pink focus:ring-2 focus:ring-pink outline-none resize-none"
-              placeholder="Masukkan alasan pembatalan..."
-              rows={3}
-              value={cancelReason}
-              onChange={(e) => setCancelReason(e.target.value)}
-            />
-          </div>
-          {error && <p className="text-red-500 mb-2">{error}</p>}
-          <div className="flex justify-end mt-4">
+        </dialog>
+      )}
+
+      {/* Modal Konfirmasi Pembatalan Berhasil */}
+      {showSuccessModal && (
+        <dialog open className="modal bg-black/40">
+          <div className="flex flex-col justify-center items-center modal-box max-w-xl bg-pink rounded-2xl p-6 text-center">
             <button
-              className="btn bg-pink text-white px-4 py-1 rounded-lg font-semibold hover:scale-105 transition duration-300"
-              onClick={handleCancelOrder}
-              disabled={isSubmitting}
+              onClick={handleSuccessModalClose} // Ganti jadi handleSuccessModalClose
+              className="btn btn-md btn-circle btn-ghost text-white absolute right-2 top-2 hover:text-pink transition duration-300"
             >
-              {isSubmitting ? "Memproses..." : "Ajukan Pembatalan"}
+              ✕
             </button>
+            <h3 className="text-3xl text-white font-bold max-w-sm text-center">
+              Pesanan Berhasil Dibatalkan
+            </h3>
+            <img className="mx-auto -mt-12 w-96 mb-10" src="/image/cancel.png" alt="Sukses" />
           </div>
-        </div>
-      </div>
-    </dialog>
+        </dialog>
+      )}
+    </>
   );
 }
 
@@ -461,7 +489,7 @@ export default function PurchaseHistory() {
         <CancelModal
           order={cancelOrder}
           onClose={() => setCancelOrder(null)}
-          onOrderUpdated={fetchOrders} // Tambah prop onOrderUpdated
+          onOrderUpdated={fetchOrders}
         />
       </div>
     </AuthLayout>

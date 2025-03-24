@@ -312,27 +312,36 @@ class OrderController extends Controller
 
     public function cancelOrder(Request $request, $id)
     {
-    try {
-        $order = Order::findOrFail($id);
-        if ($order->status_order !== 'processed') {
+        try {
+            $order = Order::findOrFail($id);
+
+            // Cek kalo status order bukan 'processed'
+            if ($order->status_order !== 'processed') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hanya order dengan status processed yang bisa dibatalkan',
+                ], 400);
+            }
+
+            // Update status order jadi canceled
+            $order->status_order = 'canceled';
+            // $order->cancel_reason = $request->input('cancel_reason');
+            $order->save();
+
+            // Update saldo user (tambah sesuai total_harga)
+            $user = User::findOrFail($order->id_user);
+            $user->saldo += $order->total_harga; // Tambah saldo
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Order berhasil dibatalkan dan saldo telah dikembalikan',
+            ], 200);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Hanya order dengan status processed yang bisa dibatalkan',
-            ], 400);
+                'message' => 'Gagal membatalkan order: ' . $e->getMessage(),
+            ], 500);
         }
-
-        $order->status_order = 'canceled';
-        $order->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Order berhasil dibatalkan',
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Gagal membatalkan order: ' . $e->getMessage(),
-        ], 500);
     }
-}
 }
