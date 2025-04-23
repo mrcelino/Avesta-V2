@@ -1,22 +1,38 @@
 import React from "react";
-import { Link } from "@inertiajs/react";
+import { Link, usePage } from "@inertiajs/react";
 
 interface NavItemProps {
   href: string;
   children: React.ReactNode;
 }
 
-const NAV_LINKS = [
+// Link default untuk halaman biasa
+const DEFAULT_NAV_LINKS = [
   { href: "/", label: "Beranda" },
   { href: "/product", label: "Produk" },
   { href: "/about", label: "Tentang" },
   { href: "/contact", label: "Hubungi" },
 ];
 
+// Link khusus untuk halaman /mitra
+const MITRA_NAV_LINKS = [
+  { href: "/mitra", label: "Beranda" },
+  { href: "/admin", label: "Dashboard" },
+  { href: "/mitra/about", label: "Tentang" },
+  { href: "/mitra/contact", label: "Hubungi" },
+];
+
 const Navbar = () => {
+  const { url } = usePage();
+
+  // Tentukan teks dan href tombol berdasarkan halaman
+  const mitraLink = url.startsWith("/mitra") ? { label: "User", href: "/" } : { label: "Mitra", href: "/mitra" };
+
+  // Pilih NAV_LINKS berdasarkan halaman
+  const navLinks = url.startsWith("/mitra") ? MITRA_NAV_LINKS : DEFAULT_NAV_LINKS;
+
   return (
     <nav className="navbar fixed z-50 bg-white p-4 shadow-sm flex items-center justify-between">
-      {/* Logo & Mitra */}
       <div className="flex items-center space-x-4">
         <Link href="/" className="pl-4">
           <img
@@ -26,17 +42,17 @@ const Navbar = () => {
           />
         </Link>
         <Link
-          href="/mitra"
+          href={mitraLink.href}
           className="bg-heading rounded-3xl text-white px-5 py-1 min-w-20 font-semibold transition duration-300 hover:scale-105"
         >
-          Mitra
+          {mitraLink.label}
         </Link>
       </div>
 
       {/* Navbar Menu & Actions */}
       <div className="flex-1 flex justify-end items-center space-x-4">
         <div className="flex items-center justify-center">
-          {NAV_LINKS.map(({ href, label }) => (
+          {navLinks.map(({ href, label }) => (
             <NavItem key={href} href={href}>
               {label}
             </NavItem>
