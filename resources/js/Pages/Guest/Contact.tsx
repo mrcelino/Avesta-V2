@@ -1,9 +1,9 @@
 import React from "react";
 import GuestLayout from "../../Layouts/GuestLayout";
 
-const Contact = () => {
+export function ContactSection() {
     return (
-        <GuestLayout showFooter={true}>
+        <>
             {/* Hero Section */}
             <section
                 className="bg-pink flex items-center justify-center min-h-[600px] bg-cover"
@@ -57,6 +57,13 @@ const Contact = () => {
                     </a>
                 </p>
             </section>
+        </>
+    );
+}
+const Contact = () => {
+    return (
+        <GuestLayout showFooter={true}>
+            <ContactSection />
         </GuestLayout>
     );
 };

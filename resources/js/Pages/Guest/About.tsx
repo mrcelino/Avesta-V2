@@ -1,9 +1,9 @@
 import React from "react";
 import GuestLayout from "../../Layouts/GuestLayout";
 
-const About = () => {
-    return (
-        <GuestLayout showFooter={true}>
+export function AboutSection(){
+    return(
+        <>
             <section
                 className="bg-pink flex items-center justify-center min-h-[600px] bg-cover"
                 style={{ backgroundImage: "url('/image/bghero.png')" }}
@@ -101,6 +101,14 @@ const About = () => {
                     </div>
                 </div>
             </section>
+        </>
+    )
+}
+
+const About = () => {
+    return (
+        <GuestLayout showFooter={true}>
+            <AboutSection />
         </GuestLayout>
     );
 };
