@@ -60,7 +60,7 @@ function LocationDropdown() {
   useEffect(() => {
     const fetchKelurahans = async () => {
       try {
-        const response = await axios.get("http://127.0.0.1:8000/api/warungs/kelurahan");
+        const response = await axios.get("api/warungs/kelurahan");
         setKelurahans(response.data.map((item: { kelurahan: string }) => item.kelurahan));
       } catch (error) {
         console.error("Error fetching kelurahan:", error);

@@ -32,6 +32,11 @@ Route::middleware(['web'])->group(function () { // Tambah 'web' middleware
     Route::patch('/orders/{id}/cancel', [OrderController::class, 'cancelOrder']);
     Route::middleware('auth:sanctum')->post('/history', [HistoryPaymentController::class, 'store']);
     
+    // Admin - Toko
+    Route::middleware('auth:sanctum')->get('/toko', [WarungController::class, 'getuserTokoUnggas']);
+    Route::middleware('auth:sanctum')->post('/tambah-toko', [WarungController::class, 'store']);
+    Route::middleware('auth:sanctum')->delete('/toko/{id}', [WarungController::class, 'destroy']);
+    Route::middleware('auth:sanctum')->post('/update-toko/{id}', [WarungController::class, 'update']);
 });
 
 Route::get('/unggas', [ProductController::class, 'index']);
