@@ -15,6 +15,7 @@ class Warung extends Model
         'nama_warung',
         'alamat_warung',
         'nomor_hp',
+        'id_user',
         'deskripsi',
         'kecamatan',
         'kelurahan',
@@ -22,6 +23,11 @@ class Warung extends Model
         'kode_pos',
         'foto_warung',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'id_user', 'id_user');
+    }
     
     public function orders()
     {
