@@ -19,12 +19,11 @@ class User extends Authenticatable
         'alamat',
         'foto',
         'jenis_kelamin',
-        'bank',
         'tanggal_lahir',
-        'nomor_rekening',
         'no_telepon',
         'password',
         'role',
+        'saldo',
     ];
 
     protected $hidden = [

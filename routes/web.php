@@ -23,4 +23,5 @@ Route::group([], function () {
     Route::get('/withdraw', fn () => Inertia::render('Buyer/Withdraw'));
     Route::get('/topup', fn () => Inertia::render('Buyer/Topup'));
     Route::get('/warungs/{id}', [WarungController::class, 'page'])->name('warungs.show');
+    Route::get('/settings', fn () => Inertia::render('Buyer/Setting'));
 });
