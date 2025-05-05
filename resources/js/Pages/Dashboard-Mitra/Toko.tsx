@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "./Components/AdminLayout";
 import { Pencil, Trash2 } from "lucide-react";
-import { Link, usePage, router } from "@inertiajs/react";
+import { Link, router } from "@inertiajs/react";
 import axios from "axios";
 
 interface Toko {
@@ -19,9 +19,6 @@ export default function DaftarToko() {
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [selectedToko, setSelectedToko] = useState<Toko | null>(null);
-
-    const { app_url } = usePage().props;
-    const baseUrl = `${app_url}/storage/`;
 
     const fetchToko = async () => {
         try {
@@ -87,7 +84,7 @@ export default function DaftarToko() {
                                     <tr key={toko.id_warung} className="border-t">
                                         <td className="px-4 py-3">
                                             {toko.foto_warung ? (
-                                                <img src={`${baseUrl}${toko.foto_warung}`} alt={`Foto ${toko.nama_warung}`} className="size-48 rounded-2xl object-cover" />
+                                                <img src={`/storage/${toko.foto_warung}`} alt={`Foto ${toko.nama_warung}`} className="size-48 rounded-2xl object-cover" />
                                             ) : (
                                                 <div className="size-32 rounded-full bg-gray-200 text-center text-gray-500">No Image</div>
                                             )}

@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Warung;
+use App\Models\Unggas;
+use App\Models\Order;
+use App\Models\Karyawan;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -48,7 +51,7 @@ class WarungController extends Controller
     return response()->json($kelurahans);
     }
 
-
+    // GET Warung with Unggas
     public function getuserTokoUnggas(Request $request)
     {
         try {
@@ -60,6 +63,28 @@ class WarungController extends Controller
             $toko = Warung::with('unggas')
                 ->where('id_user', $userId)
                 ->get();
+    
+            if ($toko->isEmpty()) {
+                return response()->json(['message' => 'Warung not found for this user'], 404);
+            }
+    
+            return response()->json($toko, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Terjadi kesalahan di server'], 500);
+        }
+    }
+
+    public function getWarungwithOrders(Request $request)
+    {
+        try {
+            $userId = Auth::id();
+            if (!$userId) {
+                return response()->json(['error' => 'User not authenticated'], 401);
+            }
+    
+            $toko = Warung::with(['orders', 'orders.orderItems'])
+            ->where('id_user', $userId)
+            ->get();
     
             if ($toko->isEmpty()) {
                 return response()->json(['message' => 'Warung not found for this user'], 404);
@@ -157,5 +182,27 @@ class WarungController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => 'Terjadi kesalahan di server'], 500);
         }
+    }
+
+    public function getStats(Request $request, $id_warung)
+    {
+        // Jumlah pesanan berhasil (status 'completed')
+        $successfulOrders = Order::where('id_warung', $id_warung)
+            ->where('status_order', 'completed')
+            ->count();
+
+        // Total unggas (sum stok unggas di warung)
+        $totalUnggas = Unggas::where('id_warung', $id_warung)
+            ->count('id_unggas');
+
+        // // Jumlah karyawan di warung
+        // $totalEmployees = Karyawan::where('id_warung', $id_warung)
+        //     ->count();
+
+        return response()->json([
+            'successful_orders' => $successfulOrders,
+            'total_unggas' => $totalUnggas,
+            // 'total_employees' => $totalEmployees,
+        ], 200);
     }
 }
