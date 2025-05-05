@@ -1,15 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState} from "react";
 import AuthLayout from "@/Layouts/AuthLayout";
 import axios from "axios";
 import { formatIDR } from "@/Components/NavbarUser";
-import { useAuth } from "@/Layouts/AuthLayout"; 
+import { useAuth } from "@/Layouts/AuthLayout";
 
 
-// Komponen Anak untuk Konten Topup
-const TopupContent: React.FC = () => {
+// Komponen Anak untuk Konten Withdraw
+const WithdrawContent: React.FC = () => {
     const { user, setUser } = useAuth();
     const [nominal, setNominal] = useState("");
     const [selectedAmount, setSelectedAmount] = useState<string | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null); 
 
     const handleSetNominal = (amount: string) => {
         const numericValue = parseInt(amount.replace("rb", "000"), 10);
@@ -17,36 +18,40 @@ const TopupContent: React.FC = () => {
             console.log("Setting nominal to:", numericValue);
             setNominal(numericValue.toString());
             setSelectedAmount(amount);
+            setErrorMessage(null); // Reset error pas pilih nominal
         }
     };
 
-    const handleConfirmTopup = async () => {
-        console.log("handleConfirmTopup called - nominal:", nominal, "user:", user); // Debug
+    const handleConfirmWithdraw = async () => {
+        console.log("handleConfirmWithdraw called - nominal:", nominal, "user:", user);
         const convertedAmount = parseInt(nominal, 10);
         if (!isNaN(convertedAmount) && user) {
             try {
-                console.log("Confirming topup:", convertedAmount);
+                console.log("Confirming withdraw:", convertedAmount);
                 const response = await axios.post(
-                    "/api/topup",
+                    "/api/withdraw",
                     { amount: convertedAmount },
                     { withCredentials: true }
                 );
-                console.log("Topup response:", response.data);
-                // Update user di context setelah topup sukses
+                console.log("Withdraw response:", response.data);
+                // Update user di context setelah withdraw sukses
                 if (response.data.user) {
                     setUser(response.data.user); // Update saldo di context
                 }
                 setNominal("");
                 setSelectedAmount(null);
+                setErrorMessage(null); // Reset error kalo sukses
             } catch (error) {
-                if (axios.isAxiosError(error)) {
-                    console.error("Topup failed:", error.response?.data || error.message);
+                if (axios.isAxiosError(error) && error.response) {
+                    console.error("Withdraw failed:", error.response.data);
+                    setErrorMessage(error.response.data.message); // Tampilin pesan error dari backend
                 } else {
-                    console.error("Topup failed:", error);
+                    console.error("Withdraw failed:", error);
+                    setErrorMessage("Terjadi kesalahan, coba lagi.");
                 }
             }
         } else {
-            console.log("Topup skipped - invalid amount or no user:", { convertedAmount, user });
+            console.log("Withdraw skipped - invalid amount or no user:", { convertedAmount, user });
         }
     };
     return (
@@ -60,8 +65,12 @@ const TopupContent: React.FC = () => {
                     {user ? formatIDR(user.saldo) : "Rp 0,00"}
                 </h2>
                 <h2 className="flex font-semibold text-black justify-end pr-2 text-lg mt-4">
-                    Top Up
+                    Withdraw
                 </h2>
+
+                {errorMessage && (
+                    <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
+                )}
 
                 <input
                     type="text"
@@ -71,6 +80,7 @@ const TopupContent: React.FC = () => {
                         console.log("Input changed, new nominal:", value);
                         setNominal(value);
                         setSelectedAmount(null);
+                        setErrorMessage(null); // Reset error pas ketik
                     }}
                     className="border-2 border-gray-200 rounded-2xl w-full p-2 mt-4"
                     placeholder="Rp"
@@ -98,9 +108,9 @@ const TopupContent: React.FC = () => {
                         Batal
                     </a>
                     <button
-                        onClick={handleConfirmTopup}
+                        onClick={handleConfirmWithdraw}
                         className="btn w-1/2 bg-pink text-white font-semibold py-2 px-4 rounded-2xl"
-                        disabled={!nominal}
+                        disabled={!nominal || !user}
                     >
                         Konfirmasi
                     </button>
@@ -110,11 +120,11 @@ const TopupContent: React.FC = () => {
     );
 };
 
-// Komponen Utama Topup sebagai Wrapper
-export default function Topup() {
+// Komponen Utama Withdraw sebagai Wrapper
+export default function Withdraw() {
     return (
-        <AuthLayout>
-            <TopupContent />
+        <AuthLayout useCleanNavbar>
+            <WithdrawContent />
         </AuthLayout>
     );
 }

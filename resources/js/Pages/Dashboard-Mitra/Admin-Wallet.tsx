@@ -5,7 +5,6 @@ import { formatIDR } from "@/Components/NavbarUser";
 import axios from "axios";
 import { useAuth } from "@/Layouts/AuthLayout";
 
-
 interface HistoryPayment {
     id_history_payment: number;
     tanggal_history: string;
@@ -62,12 +61,6 @@ const WalletContent: React.FC = () => {
                             </div>
                         </div>
                         <div className="flex space-x-4">
-                            <Link
-                                href="/topup"
-                                className="btn bg-white text-pink text-lg rounded-xl font-semibold hover:scale-105 transition duration-300"
-                            >
-                                Topup
-                            </Link>
                             <Link
                                 href="/withdraw"
                                 className="btn bg-white text-pink text-lg rounded-xl font-semibold hover:scale-105 transition duration-300"
@@ -126,7 +119,7 @@ const WalletContent: React.FC = () => {
 // Komponen Utama Wallet sebagai Wrapper
 export default function Wallet() {
     return (
-        <AuthLayout>
+        <AuthLayout useCleanNavbar>
             <WalletContent />
         </AuthLayout>
     );

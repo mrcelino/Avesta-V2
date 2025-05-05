@@ -34,12 +34,18 @@ Route::middleware(['web'])->group(function () { // Tambah 'web' middleware
     
     // Admin - Toko
     Route::middleware('auth:sanctum')->get('/toko', [WarungController::class, 'getuserTokoUnggas']);
+    Route::middleware('auth:sanctum')->get('/toko/pesanan', [WarungController::class, 'getWarungwithOrders']);
     Route::middleware('auth:sanctum')->post('/tambah-toko', [WarungController::class, 'store']);
     Route::middleware('auth:sanctum')->delete('/toko/{id}', [WarungController::class, 'destroy']);
     Route::middleware('auth:sanctum')->post('/update-toko/{id}', [WarungController::class, 'update']);
+    Route::middleware('auth:sanctum')->post('/update-produk/{id}', [ProductController::class, 'update']);
+    Route::middleware('auth:sanctum')->get('/warung-stats/{id_warung}', [WarungController::class, 'getStats']);
 });
 
 Route::get('/unggas', [ProductController::class, 'index']);
+Route::get('/unggas/{id}', [ProductController::class, 'show']);
+Route::delete('/unggas/{id}', [ProductController::class, 'destroy']);
+Route::post('/tambah-unggas', [ProductController::class, 'store']);
 Route::get('/warungs', [WarungController::class, 'all']);
 Route::get('/warungs/kelurahan', [WarungController::class, 'getKelurahan']);
 Route::get('/warungs/{id}', [WarungController::class, 'show']);

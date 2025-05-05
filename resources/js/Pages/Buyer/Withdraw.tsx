@@ -1,18 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState} from "react";
 import AuthLayout from "@/Layouts/AuthLayout";
 import axios from "axios";
 import { formatIDR } from "@/Components/NavbarUser";
 import { useAuth } from "@/Layouts/AuthLayout";
 
-interface User {
-    saldo: number;
-    password: string;
-    id_user: number;
-    nama_depan: string;
-    nama_belakang: string;
-    email: string;
-    role: string;
-}
 
 // Komponen Anak untuk Konten Withdraw
 const WithdrawContent: React.FC = () => {

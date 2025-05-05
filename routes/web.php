@@ -31,12 +31,16 @@ Route::group([], function () {
     Route::get('/admin/pesanan', fn () => Inertia::render('Dashboard-Mitra/Pesanan'));
     Route::get('/admin/produk', fn () => Inertia::render('Dashboard-Mitra/Produk'));
     Route::get('/admin/tambah-produk', fn () => Inertia::render('Dashboard-Mitra/Produk-Tambah'));
-    Route::get('/admin/edit-produk', fn () => Inertia::render('Dashboard-Mitra/Produk-Edit'));
+    Route::get('/admin/edit-produk/{id_unggas}', fn ($id_unggas) => Inertia::render('Dashboard-Mitra/Produk-Edit', [
+        'id_unggas' => (int) $id_unggas,
+    ]));
     Route::get('/admin/toko', fn () => Inertia::render('Dashboard-Mitra/Toko'));
     Route::get('/admin/tambah-toko', fn () => Inertia::render('Dashboard-Mitra/Toko-Tambah'));
     Route::get('/admin/edit-toko/{id_warung}', fn ($id_warung) => Inertia::render('Dashboard-Mitra/Toko-Edit', [
         'id_warung' => (int) $id_warung,
     ]));
+    Route::get('/admin/wallet', fn () => Inertia::render('Dashboard-Mitra/Admin-Wallet'));
+    Route::get('/admin/withdraw', fn () => Inertia::render('Dashboard-Mitra/Admin-Withdraw'));
 });
 
 
