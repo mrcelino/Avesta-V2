@@ -78,13 +78,13 @@ const WalletContent: React.FC = () => {
                                 <div key={transaction.id_history_payment} className="flex justify-between">
                                     <div className="flex flex-col">
                                         <h2 className="font-semibold">
-                                            {transaction.tipe_transaksi === "top-up"
-                                                ? "Topup"
+                                            {transaction.tipe_transaksi === "pembayaran"
+                                                ? "Pesanan berhasil"
                                                 : transaction.tipe_transaksi === "penarikan"
                                                 ? "Withdraw"
                                                 : transaction.tipe_transaksi === "refund"
                                                 ? "Pembatalan Pesanan"
-                                                : "Pembayaran"}
+                                                : "Top-up"}
                                         </h2>
                                         <h2 className="text-[#B7B6B6] font-semibold text-sm">
                                             {new Date(transaction.tanggal_history).toLocaleDateString(
@@ -95,12 +95,12 @@ const WalletContent: React.FC = () => {
                                     </div>
                                     <h2
                                         className={`font-medium ${
-                                            transaction.tipe_transaksi === "top-up" || transaction.tipe_transaksi === "refund"
+                                            transaction.tipe_transaksi === "pembayaran" || transaction.tipe_transaksi === "refund"
                                                 ? "text-[#30B666]"
                                                 : "text-red-500"
                                         }`}
                                     >
-                                    {transaction.tipe_transaksi === "top-up" || transaction.tipe_transaksi === "refund"
+                                    {transaction.tipe_transaksi === "pembayaran" || transaction.tipe_transaksi === "refund"
                                         ? `+${formatIDR(transaction.wallet_payment)}` 
                                         : `-${formatIDR(transaction.wallet_payment)}`} 
                                     </h2>

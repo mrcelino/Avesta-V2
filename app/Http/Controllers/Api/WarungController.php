@@ -6,12 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\Warung;
 use App\Models\Unggas;
 use App\Models\Order;
+use App\Models\User;
+use App\Models\HistoryPayment;
 use App\Models\Karyawan;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 class WarungController extends Controller
 {
     public function page($id)
@@ -81,18 +84,36 @@ class WarungController extends Controller
             if (!$userId) {
                 return response()->json(['error' => 'User not authenticated'], 401);
             }
-    
+
             $toko = Warung::with(['orders', 'orders.orderItems'])
-            ->where('id_user', $userId)
-            ->get();
-    
+                ->where('id_user', $userId)
+                ->get();
+
             if ($toko->isEmpty()) {
                 return response()->json(['message' => 'Warung not found for this user'], 404);
             }
-    
+
+            // Tambahkan jenis_unggas ke order_items dengan join
+            $toko = $toko->map(function ($warung) {
+                $warung->orders = $warung->orders->map(function ($order) {
+                    if ($order->orderItems) {
+                        $order->order_items = $order->orderItems->map(function ($item) {
+                            // Ambil jenis_unggas dari tabel unggas berdasarkan id_unggas
+                            $jenisUnggas = DB::table('unggas')
+                                ->where('id_unggas', $item->id_unggas)
+                                ->value('jenis_unggas');
+                            $item->jenis_unggas = $jenisUnggas ?? 'Nama Unggas Tidak Diketahui';
+                            return $item;
+                        });
+                    }
+                    return $order;
+                });
+                return $warung;
+            });
+
             return response()->json($toko, 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Terjadi kesalahan di server'], 500);
+            return response()->json(['error' => 'Terjadi kesalahan di server: ' . $e->getMessage()], 500);
         }
     }
     public function store(Request $request)
@@ -158,6 +179,74 @@ class WarungController extends Controller
         }
     }
     
+    public function completeOrder(Request $request)
+    {
+        try {
+            $userId = Auth::id();
+            if (!$userId) {
+                return response()->json(['error' => 'User not authenticated'], 401);
+            }
+
+            $request->validate([
+                'id_order' => 'required|integer|exists:orders,id_order',
+            ]);
+
+            $order = Order::find($request->id_order);
+
+            // Pastikan order milik user yang login
+            $warung = Warung::where('id_user', $userId)
+                ->where('id_warung', $order->id_warung)
+                ->first();
+            if (!$warung) {
+                return response()->json(['error' => 'Order not found or unauthorized'], 403);
+            }
+
+            // Cek status order
+            if ($order->status_order === 'completed') {
+                return response()->json(['message' => 'Order already completed'], 400);
+            }
+            if ($order->status_order === 'canceled') {
+                return response()->json(['message' => 'Cannot complete a canceled order'], 400);
+            }
+
+            // Mulai transaksi
+            DB::beginTransaction();
+
+            // Ubah status order jadi completed
+            $order->status_order = 'completed';
+            $order->updated_at = now();
+            $order->save();
+
+            // Tambah saldo ke user (pemilik warung)
+            $user = User::find($userId);
+            if (!$user) {
+                DB::rollBack();
+                return response()->json(['error' => 'User not found'], 404);
+            }
+
+            $totalHarga = (float) $order->total_harga;
+            $user->saldo = ($user->saldo ?? 0) + $totalHarga;
+            $user->save();
+
+            // Buat entri di history_payment
+            HistoryPayment::create([
+                'tanggal_history' => now(), // Waktu sekarang
+            //   'status_history' => 'completed', // Otomatis completed
+                'tipe_transaksi' => 'pembayaran', // Tipe withdraw
+                'id_user' => $user->id_user, // Sesuaikan nama kolom id user
+                'wallet_payment' => $totalHarga, // Nominal yang ditarik
+                'id_order' => null, // Kosong untuk withdraw
+                'id_payment' => null, // Kosong untuk withdraw
+            ]);
+
+            DB::commit();
+
+            return response()->json(['message' => 'Order completed and saldo updated'], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'Terjadi kesalahan di server: ' . $e->getMessage()], 500);
+        }
+    }
     
 
     public function destroy($id_warung)
