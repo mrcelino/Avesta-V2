@@ -32,4 +32,9 @@ class Warung extends Model
     {
         return $this->hasMany(Unggas::class, 'id_warung', 'id_warung'); 
     }
+
+    public function karyawans()
+    {
+        return $this->hasMany(User::class, 'id_warung', 'id_warung')->where('role', 'karyawan');
+    }
 }

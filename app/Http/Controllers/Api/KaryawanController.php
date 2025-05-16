@@ -7,11 +7,19 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class KaryawanController extends Controller
 {
     public function store(Request $request)
     {
+        // Ambil user yang sedang login (harus pemilik)
+        $owner = Auth::user();
+
+        if (!$owner || $owner->role !== 'pemilik') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         // Validasi input
         $validator = Validator::make($request->all(), [
             'nama_depan' => 'required|string|max:255',
@@ -31,7 +39,7 @@ class KaryawanController extends Controller
             $fotoPath = $request->file('foto')->store('foto-karyawan', 'public');
         }
 
-        // Buat user karyawan
+        // Buat user karyawan dengan id_warung milik owner
         $user = User::create([
             'nama_depan' => $request->nama_depan,
             'nama_belakang' => $request->nama_belakang,
@@ -39,6 +47,7 @@ class KaryawanController extends Controller
             'no_telepon' => $request->no_telepon,
             'foto' => $fotoPath,
             'role' => 'karyawan',
+            'id_warung' => $owner->id_warung, // ⬅️ Tambahan penting
             'password' => Hash::make('password'), // default password
         ]);
 
@@ -47,4 +56,49 @@ class KaryawanController extends Controller
             'data' => $user,
         ], 201);
     }
+
+    public function update(Request $request, $id)
+    {
+        $karyawan = User::where('role', 'karyawan')->findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'nama_depan' => 'sometimes|required|string|max:255',
+            'nama_belakang' => 'sometimes|required|string|max:255',
+            'email' => 'sometimes|required|email|unique:users,email,' . $id,
+            'no_telepon' => 'sometimes|required|string|max:15',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        if ($request->hasFile('foto')) {
+            $fotoPath = $request->file('foto')->store('foto-karyawan', 'public');
+            $karyawan->foto = $fotoPath;
+        }
+
+        $karyawan->fill($request->only(['nama_depan', 'nama_belakang', 'email', 'no_telepon']));
+        $karyawan->save();
+
+        return response()->json(['message' => 'Karyawan berhasil diupdate', 'data' => $karyawan]);
+    }
+
+    public function destroy($id)
+    {
+        $karyawan = User::where('role', 'karyawan')->findOrFail($id);
+        $karyawan->delete();
+
+        return response()->json(['message' => 'Karyawan berhasil dihapus']);
+    }
+
+    public function getByWarung($id_warung)
+    {
+        $karyawans = User::where('role', 'karyawan')
+            ->where('id_warung', $id_warung)
+            ->get();
+
+        return response()->json($karyawans);
+    }
+
 }
