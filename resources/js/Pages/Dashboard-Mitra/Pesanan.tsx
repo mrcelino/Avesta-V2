@@ -146,10 +146,6 @@ export default function Pesanan() {
         }
     };
 
-    const showCheckboxColumn = paginatedOrders.some(
-        (order) => order.status_order !== "canceled"
-    );
-
     return (
         <AdminLayout>
             <h1 className="text-2xl font-bold mb-4">Daftar Pesanan</h1>
@@ -183,12 +179,8 @@ export default function Pesanan() {
                                 Jumlah Pesanan(kg)
                             </th>
                             <th className="p-3 font-semibold">Catatan</th>
-                            <th className="p-3 font-semibold">
-                                Tanggal Pesanan
-                            </th>
-                            {showCheckboxColumn && (
-                                <th className="p-3 font-semibold">Sudah Diambil</th>
-                            )}
+                            <th className="p-3 font-semibold">Tanggal Pesanan</th>
+                            <th className="p-3 font-semibold">Sudah Diambil</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white">
@@ -232,8 +224,8 @@ export default function Pesanan() {
                                         {order.order_items[0]?.catatan || "-"}
                                     </td>
                                     <td className="p-3">{order.tanggal_order}</td>
-                                    {order.status_order !== "canceled" && (
-                                        <td className="p-3">
+                                    <td className="p-3">
+                                        {order.status_order !== "canceled" ? (
                                             <input
                                                 type="checkbox"
                                                 checked={order.status_order === "completed"}
@@ -249,8 +241,10 @@ export default function Pesanan() {
                                                         : "bg-white border-gray-300 border-2"
                                                 }`}
                                             />
-                                        </td>
-                                    )}
+                                        ) : (
+                                            <span></span> // Kolom kosong untuk status "canceled"
+                                        )}
+                                    </td>
                                 </tr>
                             ))
                         )}
