@@ -1,9 +1,12 @@
 import { Link, router } from "@inertiajs/react";
 import AdminLayout from "./Components/AdminLayout";
-import { useState, FormEvent, ChangeEvent } from "react";
+import { useState, useEffect, FormEvent, ChangeEvent } from "react";
 import axios from "axios";
 
-// State awal dan default values digabung
+// Deklarasi Leaflet
+declare let L: any;
+
+// State awal dengan tambahan latitude dan longitude
 const initialData = {
     nama_warung: "",
     alamat_warung: "",
@@ -14,9 +17,11 @@ const initialData = {
     kecamatan: "Mlati",
     kode_pos: "55284",
     kota: "Kabupaten Sleman",
+    latitude: "",
+    longitude: "",
 };
 
-// Komponen InputField disederhanain
+// Komponen InputField (sesuai dengan TokoEdit.tsx)
 const InputField = ({
     label,
     name,
@@ -79,16 +84,57 @@ export default function TokoTambah() {
     const [formData, setFormData] = useState(initialData);
     const [preview, setPreview] = useState<string | null>(null);
     const [errors, setErrors] = useState<{ [key: string]: string[] }>({});
+    const [isMapOpen, setIsMapOpen] = useState(false);
+
+    useEffect(() => {
+        if (!isMapOpen) return;
+
+        const lat = parseFloat(formData.latitude) || -6.2;
+        const lng = parseFloat(formData.longitude) || 106.816666;
+
+        const redIcon = new L.Icon({
+            iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
+            shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41],
+        });
+
+        const map = L.map("map").setView([lat, lng], 15);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+
+        const marker = L.marker([lat, lng], { icon: redIcon, draggable: true }).addTo(map);
+
+        marker.on("dragend", () => {
+            const { lat, lng } = marker.getLatLng();
+            setFormData((prev) => ({
+                ...prev,
+                latitude: lat.toFixed(8),
+                longitude: lng.toFixed(8),
+            }));
+        });
+
+        map.on("click", (e: any) => {
+            const { lat, lng } = e.latlng;
+            marker.setLatLng([lat, lng]);
+            setFormData((prev) => ({
+                ...prev,
+                latitude: lat.toFixed(8),
+                longitude: lng.toFixed(8),
+            }));
+        });
+
+        return () => {
+            map.remove();
+        };
+    }, [isMapOpen]);
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value, files } = e.target;
-        if (files) {
-            const file = files[0] || null;
-            setFormData((prev) => ({ ...prev, [name]: file }));
-            setPreview(file ? URL.createObjectURL(file) : null);
-        } else {
-            setFormData((prev) => ({ ...prev, [name]: value }));
-        }
+        const newValue = files ? files[0] : name === "nomor_hp" ? value.replace(/\D/g, "") : value;
+        setFormData((prev) => ({ ...prev, [name]: newValue }));
+        if (files) setPreview(files[0] ? URL.createObjectURL(files[0]) : null);
         setErrors((prev) => ({ ...prev, [name]: [] }));
     };
 
@@ -96,7 +142,7 @@ export default function TokoTambah() {
         e.preventDefault();
         const data = new FormData();
         Object.entries(formData).forEach(([key, value]) => {
-            if (value !== null) data.append(key, value as string | Blob);
+            if (value !== null && value !== "") data.append(key, value as string | Blob);
         });
 
         try {
@@ -117,22 +163,50 @@ export default function TokoTambah() {
         }
     };
 
+    const fields = ["nama_warung", "deskripsi", "nomor_hp", "alamat_warung", "kelurahan"];
+
     return (
         <AdminLayout>
             <h1 className="text-2xl font-bold mb-4">Tambah Toko</h1>
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-white rounded-lg shadow-md p-4 space-y-4">
                     <h2 className="text-lg font-semibold">Data Toko</h2>
-                    <InputField label="Nama" name="nama_warung" value={formData.nama_warung} onChange={handleChange} error={errors.nama_warung} required />
-                    <InputField label="Deskripsi" name="deskripsi" value={formData.deskripsi} onChange={handleChange} error={errors.deskripsi} />
-                    <InputField label="Nomor HP" name="nomor_hp" value={formData.nomor_hp} onChange={handleChange} error={errors.nomor_hp} type="number" />
-                    <InputField label="Alamat" name="alamat_warung" value={formData.alamat_warung} onChange={handleChange} error={errors.alamat_warung} required />
-                    <InputField label="Kelurahan" name="kelurahan" value={formData.kelurahan} onChange={handleChange} error={errors.kelurahan} />
+                    {fields.map((field) => (
+                        <InputField
+                            key={field}
+                            label={field.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                            name={field}
+                            value={formData[field as keyof typeof formData]}
+                            onChange={handleChange}
+                            error={errors[field]}
+                            required={field === "nama_warung" || field === "alamat_warung"}
+                        />
+                    ))}
                 </div>
 
-                <div className="bg-white rounded-lg shadow-md h-fit p-4">
-                    <h2 className="text-lg font-semibold mb-2">Foto Toko</h2>
-                    <InputField label="Foto" name="foto_warung" value={formData.foto_warung} onChange={handleChange} error={errors.foto_warung} type="file" preview={preview} />
+                <div className="bg-white h-fit rounded-lg shadow-md p-4">
+                    <h2 className="text-lg font-semibold mb-2">Foto & Lokasi Toko</h2>
+                    <InputField
+                        label="Foto"
+                        name="foto_warung"
+                        value={formData.foto_warung}
+                        onChange={handleChange}
+                        error={errors.foto_warung}
+                        type="file"
+                        preview={preview}
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setIsMapOpen(true)}
+                        className="text-center mt-4 bg-pink w-full p-2 rounded-xl font-bold text-white"
+                    >
+                        Pilih Lokasi Toko
+                    </button>
+                    {formData.latitude && formData.longitude && (
+                        <p className="mt-2 text-sm text-gray-600 hidden">
+                            Koordinat: {formData.latitude}, {formData.longitude}
+                        </p>
+                    )}
                 </div>
 
                 <div className="col-span-1 md:col-span-2 flex gap-2">
@@ -144,6 +218,28 @@ export default function TokoTambah() {
                     </Link>
                 </div>
             </form>
+
+            {isMapOpen && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-xl p-4 w-full max-w-3xl">
+                        <div id="map" className="w-full h-[450px] rounded-xl mb-4" />
+                        <div className="flex justify-center gap-6">
+                            <button
+                                onClick={() => setIsMapOpen(false)}
+                                className="px-4 py-2 border border-gray-300 rounded-lg font-semibold w-52"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={() => setIsMapOpen(false)}
+                                className="px-4 py-2 bg-pink text-white rounded-lg font-semibold w-52"
+                            >
+                                Konfirmasi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AdminLayout>
     );
 }

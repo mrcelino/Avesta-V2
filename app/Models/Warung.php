@@ -22,6 +22,8 @@ class Warung extends Model
         'kota',
         'kode_pos',
         'foto_warung',
+        'latitude',
+        'longitude',
     ];
 
     public function user()

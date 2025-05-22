@@ -3,6 +3,8 @@ import AdminLayout from "./Components/AdminLayout";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+declare let L: any;
+
 const InputField = ({ label, name, value, onChange, error, type = "text", required, preview }: {
   label: string;
   name: string;
@@ -53,8 +55,9 @@ const InputField = ({ label, name, value, onChange, error, type = "text", requir
 );
 
 export default function TokoEdit() {
-  const { id_warung, app_url } = usePage().props;
-  const baseUrl = `${app_url}/storage/`;
+  const { id_warung } = usePage().props;
+  const [isMapOpen, setIsMapOpen] = useState(false);
+  const baseUrl = `/storage/`;
   const [formData, setFormData] = useState({
     nama_warung: "",
     alamat_warung: "",
@@ -62,6 +65,8 @@ export default function TokoEdit() {
     kelurahan: "",
     deskripsi: "",
     nomor_hp: "",
+    latitude: "",
+    longitude: "",
   });
   const [preview, setPreview] = useState<string | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string[] }>({});
@@ -76,11 +81,57 @@ export default function TokoEdit() {
           kelurahan: data.kelurahan || "",
           deskripsi: data.deskripsi || "",
           nomor_hp: data.nomor_hp || "",
+          latitude: data.latitude || "",
+          longitude: data.longitude || "",
         });
         setPreview(data.foto_warung ? `${baseUrl}${data.foto_warung}` : null);
       })
     );
   }, [id_warung]);
+
+useEffect(() => {
+  if (!isMapOpen) return;
+
+  const lat = parseFloat(formData.latitude) || -6.2;
+  const lng = parseFloat(formData.longitude) || 106.816666;
+
+  const redIcon = new L.Icon({
+    iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
+    shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+  });
+
+  const map = L.map("map").setView([lat, lng], 15);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+
+  const marker = L.marker([lat, lng], { icon: redIcon, draggable: true }).addTo(map);
+
+  marker.on("dragend", () => {
+    const { lat, lng } = marker.getLatLng();
+    setFormData((prev) => ({
+      ...prev,
+      latitude: lat.toFixed(8),
+      longitude: lng.toFixed(8),
+    }));
+  });
+
+  map.on("click", (e: any) => {
+    const { lat, lng } = e.latlng;
+    marker.setLatLng([lat, lng]);
+    setFormData((prev) => ({
+      ...prev,
+      latitude: lat.toFixed(8),
+      longitude: lng.toFixed(8),
+    }));
+  });
+
+  return () => {
+    map.remove();
+  };
+}, [isMapOpen]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, files } = e.target;
@@ -93,7 +144,10 @@ export default function TokoEdit() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const data = new FormData();
-    Object.entries(formData).forEach(([key, val]) => val && data.append(key, val as string | Blob));
+    Object.entries(formData).forEach(([key, val]) => {
+      if (val !== null && val !== "") data.append(key, val as string | Blob);
+    });
+
     try {
       await axios.get("/sanctum/csrf-cookie");
       await axios.post(`/api/update-toko/${id_warung}`, data, { headers: { "Accept": "application/json" } });
@@ -124,7 +178,7 @@ export default function TokoEdit() {
           ))}
         </div>
         <div className="bg-white rounded-lg shadow-md p-4">
-          <h2 className="text-lg font-semibold mb-2">Foto Toko</h2>
+          <h2 className="text-lg font-semibold mb-2">Foto & Lokasi Toko</h2>
           <InputField
             label="Foto"
             name="foto_warung"
@@ -134,6 +188,18 @@ export default function TokoEdit() {
             type="file"
             preview={preview}
           />
+          <button
+            type="button"
+            onClick={() => setIsMapOpen(true)}
+            className="text-center mt-4 bg-pink w-full p-2 rounded-xl font-bold text-white"
+          >
+            Pilih Lokasi Toko
+          </button>
+          {formData.latitude && formData.longitude && (
+            <p className="mt-2 text-sm text-gray-600 hidden">
+              Koordinat: {formData.latitude}, {formData.longitude}
+            </p>
+          )}
         </div>
         <div className="col-span-1 md:col-span-2 flex gap-2">
           <button type="submit" className="bg-pink text-white px-4 py-2 rounded-lg font-semibold hover:scale-105 transition">
@@ -144,6 +210,28 @@ export default function TokoEdit() {
           </Link>
         </div>
       </form>
+
+      {isMapOpen && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-4 w-full max-w-3xl">
+            <div id="map" className="w-full h-[450px] rounded-xl mb-4" />
+            <div className="flex justify-center gap-6">
+              <button
+                onClick={() => setIsMapOpen(false)}
+                className="px-4 py-2 border border-gray-300 rounded-lg font-semibold w-52"
+              >
+                Batal
+              </button>
+              <button
+                onClick={() => setIsMapOpen(false)}
+                className="px-4 py-2 bg-pink text-white rounded-lg font-semibold w-52"
+              >
+                Konfirmasi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }
