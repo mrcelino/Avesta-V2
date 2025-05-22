@@ -1,9 +1,27 @@
 import { Link, usePage } from "@inertiajs/react";
+import { useState, useEffect } from "react";
+import axios from "axios";
+
+interface User {
+  id_user: number;
+  nama_depan: string;
+  nama_belakang: string;
+  email: string;
+  role: string;
+  password: string;
+  saldo: string;
+}
 
 export default function Sidebar() {
     const { url } = usePage();
+    const [user, setUser] = useState<User | null>(() => {
+        // Ambil dari localStorage saat pertama kali
+        const cachedUser = localStorage.getItem("user");
+        return cachedUser ? JSON.parse(cachedUser) : null;
+    });
 
-    const navItems = [
+    // Definisikan navItems default
+    const defaultNavItems = [
         { href: "/admin", label: "Beranda", icon: "/image/nav-home.svg", activeKeywords: ["admin"] },
         { href: "/admin/data", label: "Data", icon: "/image/nav-data.svg", activeKeywords: ["data"] },
         { href: "/admin/karyawan", label: "Karyawan", icon: "/image/nav-karyawan.svg", activeKeywords: ["karyawan"] },
@@ -12,10 +30,38 @@ export default function Sidebar() {
         { href: "/admin/toko", label: "Toko", icon: "/image/nav-toko.svg", activeKeywords: ["toko"] },
     ];
 
+    // Filter navItems berdasarkan role
+    const navItems = user?.role === "karyawan"
+        ? defaultNavItems.filter(item => ["Beranda", "Pesanan", "Produk"].includes(item.label))
+        : defaultNavItems;
+
     // Ambil semua kata kunci dari tab lain kecuali "Beranda"
     const otherKeywords = navItems
         .filter(item => item.label !== "Beranda")
         .flatMap(item => item.activeKeywords);
+
+    useEffect(() => {
+        if (!localStorage.getItem("user")) {
+            const fetchUser = async () => {
+                try {
+                    const response = await axios.get("/api/me", {
+                        withCredentials: true,
+                    });
+                    const newUser = response.data.user;
+                    setUser(newUser);
+                    localStorage.setItem("user", JSON.stringify(newUser)); // Cache ke localStorage
+                } catch (error) {
+                    console.error("Sidebar: Fetch user failed:", error);
+                    setUser(null);
+                    if (axios.isAxiosError(error) && error.response?.status === 401) {
+                        window.location.href = "/login";
+                    }
+                }
+            };
+
+            fetchUser();
+        }
+    }, []);
 
     return (
         <div className="bg-pink fixed pt-24 left-0 h-full w-72 p-6 text-white overflow-y-auto">

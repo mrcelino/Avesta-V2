@@ -47,6 +47,7 @@ export default function Navbar() {
     try {
       await axios.post("/api/logout", {}, { withCredentials: true });
       setUser(null);
+      localStorage.removeItem("user");
       window.location.href = "/login";
     } catch (error) {
       console.error("Logout failed:", error);

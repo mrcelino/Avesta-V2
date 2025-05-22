@@ -41,7 +41,7 @@ const Login = ({ errors }: { errors: Errors }) => {
 
             const redirectPaths: Record<string, string> = {
                 pemilik: "/mitra",
-                karyawan: "/karyawan",
+                karyawan: "/admin",
                 default: "/dashboard",
             };
 
