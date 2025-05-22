@@ -11,6 +11,8 @@ use App\Http\Controllers\Api\WithdrawController;
 use App\Http\Controllers\Api\HistoryPaymentController;
 use App\Http\Controllers\Api\VerifyPasswordController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Api\KaryawanController; 
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
 Route::get('/sanctum/csrf-cookie', [CsrfCookieController::class, 'show']);
@@ -20,6 +22,9 @@ Route::middleware(['web'])->group(function () { // Tambah 'web' middleware
         Route::post('/login', [LoginController::class, 'apiLogin']);
         Route::post('/register', [RegisterController::class, 'apiRegister']); 
     });
+    Route::post('/forgot-password', [ResetPasswordController::class, 'sendToken']);
+    Route::post('/verify-token', [ResetPasswordController::class, 'verifyToken']);
+    Route::post('/reset-password', [ResetPasswordController::class, 'resetPassword']);
     Route::middleware('auth:sanctum')->post('/logout', [LoginController::class, 'apiLogout']);
     Route::middleware('auth:sanctum')->get('/me', [UserCheckController::class, 'me']);
     Route::middleware('auth:sanctum')->get('/history', [HistoryPaymentController::class, 'index']);
@@ -31,6 +36,11 @@ Route::middleware(['web'])->group(function () { // Tambah 'web' middleware
     Route::get('/orders/{id_order}', [OrderController::class, 'show']); // Ambil order spesifik
     Route::patch('/orders/{id}/cancel', [OrderController::class, 'cancelOrder']);
     Route::middleware('auth:sanctum')->post('/history', [HistoryPaymentController::class, 'store']);
+
+    // Karyawan
+    Route::middleware('auth:sanctum')->put('/karyawan/{id}', [KaryawanController::class, 'update']);
+    Route::middleware('auth:sanctum')->delete('/karyawan/{id}', [KaryawanController::class, 'destroy']);
+    Route::middleware('auth:sanctum')->get('/karyawan/warung/{id_warung}', [KaryawanController::class, 'getByWarung']);
     
     // Admin - Toko
     Route::middleware('auth:sanctum')->get('/toko', [WarungController::class, 'getuserTokoUnggas']);

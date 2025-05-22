@@ -14,6 +14,7 @@ Route::middleware('guest')->group(function () {
 
 Route::group([], function () {
     Route::get('/', fn () => Inertia::render('Welcome'));
+    Route::get('/forgotpassword', fn () => Inertia::render('Guest/ForgotPassword'));
     Route::get('/contact', fn () => Inertia::render('Guest/Contact'));
     Route::get('/about', fn () => Inertia::render('Guest/About'));
     Route::get('/product', fn () => Inertia::render('Guest/Product'));

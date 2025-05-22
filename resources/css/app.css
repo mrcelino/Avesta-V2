@@ -48,6 +48,11 @@ body.modal-active {
   scrollbar-width: none;  /* Firefox */
 }
 
+@layer utilities {
+  .bg-cInput {
+    background-color: #F4F4F4;
+  }
+}
 
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
