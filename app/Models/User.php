@@ -23,11 +23,17 @@ class User extends Authenticatable
         'no_telepon',
         'password',
         'role',
-        'saldo'
+        'saldo',
+        'id_warung',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
     ];
+
+    public function warung()
+    {
+        return $this->belongsTo(Warung::class, 'id_warung', 'id_warung');
+    }
 }
