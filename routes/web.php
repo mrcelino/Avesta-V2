@@ -28,7 +28,9 @@ Route::group([], function () {
     Route::get('/admin/data', fn () => Inertia::render('Dashboard-Mitra/Data'));
     Route::get('/admin/karyawan', fn () => Inertia::render('Dashboard-Mitra/Karyawan'));
     Route::get('/admin/tambah-karyawan', fn () => Inertia::render('Dashboard-Mitra/Karyawan-Tambah'));
-    Route::get('/admin/edit-karyawan', fn () => Inertia::render('Dashboard-Mitra/Karyawan-Edit'));
+    Route::get('/admin/edit-karyawan/{id_user}', fn ($id_user) => Inertia::render('Dashboard-Mitra/Karyawan-Edit', [
+        'id_user' => (int) $id_user,
+    ]));
     Route::get('/admin/pesanan', fn () => Inertia::render('Dashboard-Mitra/Pesanan'));
     Route::get('/admin/produk', fn () => Inertia::render('Dashboard-Mitra/Produk'));
     Route::get('/admin/tambah-produk', fn () => Inertia::render('Dashboard-Mitra/Produk-Tambah'));
