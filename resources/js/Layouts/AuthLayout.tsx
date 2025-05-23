@@ -9,12 +9,14 @@ import React from "react";
 import NavbarUser from "../Components/NavbarUser";
 import Navbar from "../Components/DashboardUser/Navbar";
 import NavbarClean from "@/Components/DashboardUser/NavbarClean";
+import NavbarAdmin from "@/Pages/Dashboard-Mitra/Components/NavbarAdmin";
 import Footer from "../Components/Footer";
 import axios from "axios";
 
 interface AuthLayoutProps {
   useDashboardNavbar?: boolean;
   useCleanNavbar?: boolean;
+  useAdminNavbar?: boolean;
 }
 
 interface User {
@@ -42,6 +44,8 @@ export interface Product {
       alamat_warung: string;
       kelurahan: string;
       foto_warung: string;
+      latitude: string | null; 
+      longitude: string | null;
   };
 }
 
@@ -174,6 +178,7 @@ const AuthLayout: React.FC<PropsWithChildren<AuthLayoutProps>> = ({
   children,
   useDashboardNavbar = false,
   useCleanNavbar = false, // Tambah default false
+  useAdminNavbar = false,
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -228,9 +233,11 @@ const AuthLayout: React.FC<PropsWithChildren<AuthLayoutProps>> = ({
   return (
       <AuthContext.Provider value={{ user, setUser, loading}}>
           <CartProvider>
-          <>
+                <>
                     {useCleanNavbar ? (
                         <NavbarClean />
+                    ) : useAdminNavbar ? (
+                        <NavbarAdmin />
                     ) : useDashboardNavbar ? (
                         <Navbar />
                     ) : (

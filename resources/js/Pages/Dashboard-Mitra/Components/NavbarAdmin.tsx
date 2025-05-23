@@ -10,7 +10,7 @@ export const formatIDR = (amount: string | number) => {
   }).format(Number(amount));
 };
 
-export default function Navbar() {
+export default function NavbarAdmin() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -111,7 +111,7 @@ function Profile({ user, loading, handleLogout }: any) {
               {loading ? "Loading..." : user ? user.nama_depan : "Guest"}
             </p>
             <Link
-              href="/wallet"
+              href="/admin/wallet"
               className="flex flex-row items-center gap-2"
             >
               <img
@@ -126,7 +126,7 @@ function Profile({ user, loading, handleLogout }: any) {
           </div>
         </div>
         <Link
-          href="/wallet"
+          href="/admin/wallet"
           className="bg-white hover:bg-pink hover:text-white rounded-3xl px-5 py-2 font-semibold transition duration-300 hover:scale-105"
         >
           Dompet

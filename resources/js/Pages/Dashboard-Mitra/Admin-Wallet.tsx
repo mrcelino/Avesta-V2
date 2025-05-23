@@ -119,7 +119,7 @@ const WalletContent: React.FC = () => {
 // Komponen Utama Wallet sebagai Wrapper
 export default function Wallet() {
     return (
-        <AuthLayout useCleanNavbar>
+        <AuthLayout useAdminNavbar>
             <WalletContent />
         </AuthLayout>
     );
