@@ -344,4 +344,33 @@ class OrderController extends Controller
             ], 500);
         }
     }
+    // GET STATUS ORDER (BUAT PICKUP)
+    public function confirmOrder($id_order)
+    {
+        try {
+            // Ambil order berdasarkan id_order, pastikan milik user yang login
+            $order = Order::where('id_order', $id_order)
+                ->where('id_user', Auth::id())
+                ->first();
+
+            if (!$order) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Order not found or unauthorized',
+                ], 404);
+            }
+
+            // Kembalikan status order
+            return response()->json([
+                'success' => true,
+                'status_order' => $order->status_order,
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching order status: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }

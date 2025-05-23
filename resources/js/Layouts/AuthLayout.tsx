@@ -73,6 +73,25 @@ interface CartContextType {
   checkStoreMatch: (product: Product) => boolean;
 }
 
+interface LocationContextType {
+  location: {
+    latitude: string | null;
+    longitude: string | null;
+    nama_warung?: string | null;
+    alamat_warung?: string | null;
+    id_order?: string | null;
+  };
+  setLocation: React.Dispatch<
+    React.SetStateAction<{
+      latitude: string | null;
+      longitude: string | null;
+      nama_warung?: string | null;
+      alamat_warung?: string | null;
+      id_order?: string | null;
+    }>
+  >;
+}
+
 const AuthContext = createContext<AuthContextType>({
   user: null,
   setUser: () => {},
@@ -81,12 +100,23 @@ const AuthContext = createContext<AuthContextType>({
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+const LocationContext = createContext<LocationContextType | undefined>(undefined);
+
 export const useAuth = () => useContext(AuthContext);
 
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {
       throw new Error("useCart must be used within a CartProvider");
+  }
+  return context;
+};
+
+// Hook untuk akses LocationContext
+export const useLocation = () => {
+  const context = useContext(LocationContext);
+  if (!context) {
+    throw new Error("useLocation must be used within a LocationProvider");
   }
   return context;
 };
@@ -177,11 +207,32 @@ const CartProvider: React.FC<PropsWithChildren> = ({ children }) => {
 const AuthLayout: React.FC<PropsWithChildren<AuthLayoutProps>> = ({
   children,
   useDashboardNavbar = false,
-  useCleanNavbar = false, // Tambah default false
+  useCleanNavbar = false,
   useAdminNavbar = false,
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [location, setLocation] = useState<{
+    latitude: string | null;
+    longitude: string | null;
+    nama_warung?: string | null;
+    alamat_warung?: string | null;
+    id_order?: string | null;
+  }>(() => {
+    const savedLocation = localStorage.getItem("location");
+    return savedLocation ? JSON.parse(savedLocation) : {
+      latitude: null,
+      longitude: null,
+      nama_warung: null,
+      alamat_warung: null,
+      id_order: null,
+    };
+  });
+
+  useEffect(() => {
+    // Simpan ke localStorage setiap kali location berubah
+    localStorage.setItem("location", JSON.stringify(location));
+  }, [location]);
 
   useEffect(() => {
       const fetchUser = async () => {
@@ -233,19 +284,21 @@ const AuthLayout: React.FC<PropsWithChildren<AuthLayoutProps>> = ({
   return (
       <AuthContext.Provider value={{ user, setUser, loading}}>
           <CartProvider>
+            <LocationContext.Provider value={{ location, setLocation }}>
                 <>
                     {useCleanNavbar ? (
-                        <NavbarClean />
+                    <NavbarClean />
                     ) : useAdminNavbar ? (
-                        <NavbarAdmin />
+                    <NavbarAdmin />
                     ) : useDashboardNavbar ? (
-                        <Navbar />
+                    <Navbar />
                     ) : (
-                        <NavbarUser />
+                    <NavbarUser />
                     )}
                     <main>{children}</main>
                     <Footer />
                 </>
+                </LocationContext.Provider>
           </CartProvider>
       </AuthContext.Provider>
   );

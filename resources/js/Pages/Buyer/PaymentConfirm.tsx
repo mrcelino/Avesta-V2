@@ -1,24 +1,21 @@
 import React, { useState, useEffect } from "react";
 import AuthLayout from "@/Layouts/AuthLayout";
 import axios from "axios";
-import { useAuth, useCart } from "@/Layouts/AuthLayout";
+import { useAuth, useCart, useLocation } from "@/Layouts/AuthLayout";
+import { router } from "@inertiajs/react";
 
-interface User {
-    saldo: number;
-    password: string; // Password hashed dari database
-    id_user: number; // Untuk foreign key di order
-}
 
 // Komponen Anak untuk Konten PaymentConfirm
 const PaymentContent: React.FC = () => {
     const [password, setPassword] = useState("");
-    const [showErrorModal, setShowErrorModal] = useState(false); // Untuk password salah
-    const [showInsufficientModal, setShowInsufficientModal] = useState(false); // Untuk saldo gak cukup
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [showInsufficientModal, setShowInsufficientModal] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
-    const [showOrderErrorModal, setShowOrderErrorModal] = useState(false); // Modal untuk error saat create order
-    const [errorMessage, setErrorMessage] = useState(""); // Simpan pesan error
-    const { user } = useAuth(); // Ambil user dari context
-    const { cart, cartTotal, clearCart } = useCart(); // Ambil cart, cartTotal, dan clearCart
+    const [showOrderErrorModal, setShowOrderErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const { user } = useAuth();
+    const { cart, cartTotal, clearCart } = useCart(); 
+    const { setLocation } = useLocation();
 
 
     const handleCancel = () => {
@@ -114,8 +111,21 @@ const PaymentContent: React.FC = () => {
 
             console.log("Order created:", orderResponse.data);
 
+            // Ambil latitude dan longitude dari warung sebelum clear cart
+            const warungLocation = cart.length > 0 ? {
+                latitude: cart[0].warung.latitude,
+                longitude: cart[0].warung.longitude,
+                nama_warung: cart[0].warung.nama_warung,
+                alamat_warung: cart[0].warung.alamat_warung,
+                id_order: orderResponse.data.id_order, 
+            } : { latitude: null, longitude: null, nama_warung: null, alamat_warung: null, id_order: null };
+
             // Ngosongin keranjang kalo berhasil
-            clearCart();
+            // clearCart();
+            // Update global location state
+            setLocation(warungLocation);
+            localStorage.setItem("location", JSON.stringify(warungLocation));
+            console.log("Location updated:", warungLocation);
             setShowSuccessModal(true); // Tampilkan modal sukses
 
         } catch (error: any) {
@@ -137,6 +147,14 @@ const PaymentContent: React.FC = () => {
                 setShowOrderErrorModal(true);
             }
         }
+    };
+    // Handle redirect setelah modal ditutup
+    const handleSuccessModalClose = () => {
+        setShowSuccessModal(false);
+        // Delay sebelum redirect
+        setTimeout(() => {
+        router.visit('/pickup');
+        }, 1500);
     };
 
     return (
@@ -203,6 +221,7 @@ const PaymentContent: React.FC = () => {
                     <div className="modal-box bg-pink">
                         <button
                             onClick={() => setShowSuccessModal(false)}
+                            // onClick = {handleSuccessModalClose}
                             className="btn btn-sm btn-circle btn-ghost text-white absolute right-2 top-2 hover:text-pink transition duration-300"
                         >
                             ✕

@@ -123,7 +123,7 @@ const WithdrawContent: React.FC = () => {
 // Komponen Utama Withdraw sebagai Wrapper
 export default function Withdraw() {
     return (
-        <AuthLayout useCleanNavbar>
+        <AuthLayout useAdminNavbar>
             <WithdrawContent />
         </AuthLayout>
     );

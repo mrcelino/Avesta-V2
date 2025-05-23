@@ -35,6 +35,7 @@ Route::middleware(['web'])->group(function () { // Tambah 'web' middleware
     Route::get('/orders', [OrderController::class, 'index']);
     Route::get('/orders/{id_order}', [OrderController::class, 'show']); // Ambil order spesifik
     Route::patch('/orders/{id}/cancel', [OrderController::class, 'cancelOrder']);
+    Route::get('/order-status/{id}', [OrderController::class, 'confirmOrder']);
     Route::middleware('auth:sanctum')->post('/history', [HistoryPaymentController::class, 'store']);
 
     // Karyawan
