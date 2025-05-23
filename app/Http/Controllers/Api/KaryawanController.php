@@ -59,7 +59,7 @@ class KaryawanController extends Controller
         ], 201);
     }
 
-public function update(Request $request, $id)
+    public function update(Request $request, $id)
     {
         // Cari berdasarkan id_user sebagai primary key
         $karyawan = User::where('role', 'karyawan')->where('id_user', $id)->firstOrFail();
