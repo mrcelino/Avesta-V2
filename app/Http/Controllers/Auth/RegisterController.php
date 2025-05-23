@@ -23,11 +23,14 @@ class RegisterController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'no_telepon' => 'required|string|max:15',
             'password' => 'required|string|min:8|confirmed',
+            'role' => 'required|in:user,mitra',
         ]);
 
         $data['password'] = Hash::make($data['password']);
-        $data['role'] = $request->role ?? 'user';
         $data['alamat'] = $request->alamat ?? '';
+
+        // Mapping role: mitra dari frontend jadi pemilik di backend
+        $data['role'] = $request->role === 'mitra' ? 'pemilik' : 'user';
 
         $user = User::create($data);
 

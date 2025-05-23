@@ -31,6 +31,9 @@ const Navbar = () => {
   // Pilih NAV_LINKS berdasarkan halaman
   const navLinks = url.startsWith("/mitra") ? MITRA_NAV_LINKS : DEFAULT_NAV_LINKS;
 
+  // Tentukan href untuk register berdasarkan URL saat ini
+  const registerHref = url.startsWith("/mitra") ? "/register?mitra" : "/register";
+
   return (
     <nav className="navbar fixed z-50 bg-white p-4 shadow-sm flex items-center justify-between">
       <div className="flex items-center space-x-4">
@@ -58,7 +61,7 @@ const Navbar = () => {
             </NavItem>
           ))}
         </div>
-        <AuthButtons />
+        <AuthButtons registerHref={registerHref} /> {/* Pass registerHref ke AuthButtons */}
       </div>
     </nav>
   );
@@ -73,7 +76,7 @@ const NavItem = ({ href, children }: NavItemProps) => (
   </Link>
 );
 
-const AuthButtons = () => (
+const AuthButtons = ({ registerHref }: { registerHref: string }) => (
   <>
     <Link
       href="/login"
@@ -82,7 +85,7 @@ const AuthButtons = () => (
       Masuk
     </Link>
     <Link
-      href="/register"
+      href={registerHref} // Gunakan registerHref yang dinamis
       className="bg-heading border-2 border-heading rounded-3xl text-white px-5 py-1 min-w-20 font-medium transition duration-300 hover:text-heading hover:bg-white"
     >
       Daftar

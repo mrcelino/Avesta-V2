@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from '@inertiajs/react';
+import React, { useState, useEffect } from 'react';
+import { Link, usePage } from '@inertiajs/react';
 import axios from 'axios';
 
 type Errors = {
@@ -10,11 +10,8 @@ type Errors = {
   password?: string;
 };
 
-type Props = {
-  role?: string;
-};
-
-const Register = ({ role = 'user' }: Props) => {
+const Register = () => {
+  const { url } = usePage();
   const [form, setForm] = useState({
     nama_depan: '',
     nama_belakang: '',
@@ -22,10 +19,21 @@ const Register = ({ role = 'user' }: Props) => {
     no_telepon: '',
     password: '',
     password_confirmation: '',
-    role,
+    role: 'user', // Default role
   });
   const [errors, setErrors] = useState<Errors>({});
   const [processing, setProcessing] = useState(false);
+
+  // Ambil role dari query parameter
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const mitraParam = urlParams.has('mitra');
+    if (mitraParam) {
+      setForm((prev) => ({ ...prev, role: 'mitra' }));
+    } else {
+      setForm((prev) => ({ ...prev, role: 'user' }));
+    }
+  }, [url]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,13 +41,13 @@ const Register = ({ role = 'user' }: Props) => {
     setErrors({});
 
     try {
-      const response = await axios.post('/api/auth/register', form);
-      console.log(response.data); // Debugging
-      window.location.href = '/login'; // Redirect ke login setelah sukses
+      await axios.post('/api/auth/register', form);
+      window.location.href = '/login';
     } catch (error: any) {
       if (error.response?.status === 422) {
         setErrors(error.response.data.errors || {});
       }
+      console.error('Error saat registrasi:', error.response?.data || error);
     } finally {
       setProcessing(false);
     }
