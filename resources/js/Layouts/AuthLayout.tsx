@@ -26,6 +26,11 @@ interface User {
   email: string;
   role: string;
   password: string;
+  alamat: string;
+  tanggal_lahir: string
+  foto: string;
+  no_telepon: string;
+  jenis_kelamin: string;
   saldo: string;
 }
 

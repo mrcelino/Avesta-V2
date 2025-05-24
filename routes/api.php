@@ -23,7 +23,7 @@ Route::middleware(['web'])->group(function () { // Tambah 'web' middleware
         Route::post('/login', [LoginController::class, 'apiLogin']);
         Route::post('/register', [RegisterController::class, 'apiRegister']); 
     });
-    Route::post('/settings', [UserController::class, 'updateProfile']);
+    Route::post('/settings/{id_user}', [UserController::class, 'updateProfile']);
     Route::post('/forgot-password', [ResetPasswordController::class, 'sendToken']);
     Route::post('/verify-token', [ResetPasswordController::class, 'verifyToken']);
     Route::post('/reset-password', [ResetPasswordController::class, 'resetPassword']);
