@@ -1,6 +1,7 @@
 import AuthLayout from "@/Layouts/AuthLayout";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { Link } from "@inertiajs/react";
 
 // Interface untuk data dari API
 interface OrderItem {
@@ -41,54 +42,64 @@ function HistoryCard({
   const additionalItemsCount = order.order_items.length - 1;
 
   return (
-    <div className="bg-white rounded-2xl p-4 border shadow-md flex items-center w-full max-w-4xl">
-      <img
-        alt="Product Image"
-        className="w-28 h-full rounded-md object-cover"
-        src={`/storage/${firstItem.foto_unggas}`}
-      />
-      <div className="ml-4 flex-1">
-        <h2 className="text-lg font-semibold">{firstItem.jenis_unggas}</h2>
-        <p className="font-normal">
-          {parseFloat(firstItem.jumlah_kg)} x Rp.{" "}
-          {parseFloat(firstItem.harga_per_kg).toLocaleString("id-ID")}
-        </p>
-        <div className="flex flex-col gap-2">
-          <p className="font-medium">{order.nama_warung}</p>
-          {additionalItemsCount > 0 && (
-            <p className="text-sm font-medium">
-              +{additionalItemsCount} Produk lainnya
-            </p>
-          )}
-        </div>
+      <div className="bg-white rounded-2xl p-4 border shadow-md flex items-center w-full max-w-4xl">
+          <img
+              alt="Product Image"
+              className="w-28 h-full rounded-md object-cover"
+              src={`/storage/${firstItem.foto_unggas}`}
+          />
+          <div className="ml-4 flex-1">
+              <h2 className="text-lg font-semibold">
+                  {firstItem.jenis_unggas}
+              </h2>
+              <p className="font-normal">
+                  {parseFloat(firstItem.jumlah_kg)} x Rp.{" "}
+                  {parseFloat(firstItem.harga_per_kg).toLocaleString("id-ID")}
+              </p>
+              <div className="flex flex-col gap-2">
+                  <Link
+                      href={`/warungs/${order.id_warung}`}
+                      className="font-medium hover:scale-95 transition duration-300"
+                  >
+                      {order.nama_warung}
+                  </Link>
+                  {additionalItemsCount > 0 && (
+                      <p className="text-sm font-medium">
+                          +{additionalItemsCount} Produk lainnya
+                      </p>
+                  )}
+              </div>
+          </div>
+          <div className="text-right">
+              <p className="mt-6">Total Pembelian</p>
+              <p className="text-lg font-medium">
+                  Rp. {parseFloat(order.total_harga).toLocaleString("id-ID")}
+              </p>
+              <div className="mt-2 flex items-center">
+                  <button
+                      className="text-pink mr-4 cursor-pointer"
+                      onClick={() => onShowModal(order)}
+                  >
+                      Lihat Detail Transaksi
+                  </button>
+                  {order.status_order === "processed" ? (
+                      <button
+                          className="btn bg-pink text-white px-4 py-2 rounded-lg font-semibold hover:scale-105 transition duration-300"
+                          onClick={() => onShowCancelModal(order)}
+                      >
+                          Batalkan
+                      </button>
+                  ) : (
+                      <Link
+                          href={`/warungs/${order.id_warung}`}
+                          className="btn bg-pink text-white px-4 py-2 rounded-lg font-semibold hover:scale-105 transition duration-300"
+                      >
+                          Beli Lagi
+                      </Link>
+                  )}
+              </div>
+          </div>
       </div>
-      <div className="text-right">
-        <p className="mt-6">Total Pembelian</p>
-        <p className="text-lg font-medium">
-          Rp. {parseFloat(order.total_harga).toLocaleString("id-ID")}
-        </p>
-        <div className="mt-2 flex items-center">
-          <button
-            className="text-pink mr-4 cursor-pointer"
-            onClick={() => onShowModal(order)}
-          >
-            Lihat Detail Transaksi
-          </button>
-          {order.status_order === "processed" ? (
-            <button
-              className="btn bg-pink text-white px-4 py-2 rounded-lg font-semibold hover:scale-105 transition duration-300"
-              onClick={() => onShowCancelModal(order)}
-            >
-              Batalkan
-            </button>
-          ) : (
-            <button className="btn bg-pink text-white px-4 py-2 rounded-lg font-semibold hover:scale-105 transition duration-300">
-              Beli Lagi
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
   );
 }
 

@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\WithdrawController;
 use App\Http\Controllers\Api\HistoryPaymentController;
 use App\Http\Controllers\Api\VerifyPasswordController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Api\KaryawanController; 
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
@@ -22,6 +23,7 @@ Route::middleware(['web'])->group(function () { // Tambah 'web' middleware
         Route::post('/login', [LoginController::class, 'apiLogin']);
         Route::post('/register', [RegisterController::class, 'apiRegister']); 
     });
+    Route::post('/settings', [UserController::class, 'updateProfile']);
     Route::post('/forgot-password', [ResetPasswordController::class, 'sendToken']);
     Route::post('/verify-token', [ResetPasswordController::class, 'verifyToken']);
     Route::post('/reset-password', [ResetPasswordController::class, 'resetPassword']);

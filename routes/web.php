@@ -51,6 +51,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/wallet', fn () => Inertia::render('Buyer/Wallet'));
     Route::get('/dashboard', fn () => Inertia::render('Buyer/Dashboard'));
     Route::get('/cariayam', fn () => Inertia::render('Buyer/CariAyam'));
+    Route::get('/settings', fn () => Inertia::render('Buyer/Settings'));
     Route::get('/checkout', fn () => Inertia::render('Buyer/Checkout'));
     Route::get('/payment', fn () => Inertia::render('Buyer/Payment'));
     Route::get('/paymentconfirm', fn () => Inertia::render('Buyer/PaymentConfirm'));
