@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Api\KaryawanController; 
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
+use App\Http\Controllers\Api\LaporanController;
 
 Route::get('/sanctum/csrf-cookie', [CsrfCookieController::class, 'show']);
 // Grouping route yang butuh session
@@ -39,6 +40,10 @@ Route::middleware(['web'])->group(function () { // Tambah 'web' middleware
     Route::patch('/orders/{id}/cancel', [OrderController::class, 'cancelOrder']);
     Route::get('/order-status/{id}', [OrderController::class, 'confirmOrder']);
     Route::middleware('auth:sanctum')->post('/history', [HistoryPaymentController::class, 'store']);
+    Route::get('/laporan-penjualan', [LaporanController::class, 'penjualan']);
+    Route::get('/laporan-kategori', [LaporanController::class, 'kategoriPenjualan']);
+
+
 
     // Karyawan
     Route::middleware('auth:sanctum')->post('/karyawan', [KaryawanController::class, 'store']);
