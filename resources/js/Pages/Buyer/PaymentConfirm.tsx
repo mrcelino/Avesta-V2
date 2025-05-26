@@ -121,7 +121,7 @@ const PaymentContent: React.FC = () => {
             } : { latitude: null, longitude: null, nama_warung: null, alamat_warung: null, id_order: null };
 
             // Ngosongin keranjang kalo berhasil
-            // clearCart();
+            clearCart();
             // Update global location state
             setLocation(warungLocation);
             localStorage.setItem("location", JSON.stringify(warungLocation));
@@ -220,8 +220,7 @@ const PaymentContent: React.FC = () => {
                 <div className="modal modal-open">
                     <div className="modal-box bg-pink">
                         <button
-                            onClick={() => setShowSuccessModal(false)}
-                            // onClick = {handleSuccessModalClose}
+                            onClick = {handleSuccessModalClose}
                             className="btn btn-sm btn-circle btn-ghost text-white absolute right-2 top-2 hover:text-pink transition duration-300"
                         >
                             ✕
