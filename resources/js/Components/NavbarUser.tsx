@@ -144,51 +144,67 @@ function Profile() {
         console.error("Logout failed:", error);
     }
   };
+  console.log("Profile component rendered, user:", user);
 
   return (
-    <div className="dropdown dropdown-bottom dropdown-end">
-      <div
-        tabIndex={0}
-        role="button"
-        className="btn rounded-full p-2 size-12 flex items-center justify-center"
-      ></div>
-      <ul
-        tabIndex={0}
-        className="dropdown-content menu min-w-60 max-w-2xl min-h-40 bg-base-100 rounded-2xl z-1 mt-2 p-3 shadow-md"
-      >
-        <div className="flex items-center justify-start gap-4 max-w-2xl min-h-14 border-2 p-2 rounded-xl shadow-2xs">
-          <div className="rounded-full size-10 bg-gray-200"></div>
-          <div className="flex-col">
-            <p className="font-semibold text-base">
-              {user ? `${user.nama_depan}` : "Loading..."}
-            </p>
-            <Link href="/wallet" className="flex flex-row items-center gap-2">
-              <img src="/image/coin.svg" alt="Coin Icon" className="size-5 object-cover" />
-              <p className="text-base">{user ? formatIDR(user.saldo) : "Rp 0,00"}</p>
-            </Link>
-          </div>
-        </div>
-        <Link
-          href="/purchasehistory"
-          className="bg-white hover:bg-pink hover:text-white rounded-3xl px-5 py-2 font-semibold transition duration-300 hover:scale-105 mt-4"
-        >
-          Riwayat Pembelian
-        </Link>
-        <Link
-          href="/settings"
-          className="bg-white hover:bg-pink hover:text-white rounded-3xl px-5 py-2 font-semibold transition duration-300 hover:scale-105"
-        >
-          Pengaturan
-        </Link>
-        <div
-          onClick={handleLogout}
-          className="flex justify-between pr-4 bg-white hover:bg-pink hover:text-white rounded-3xl px-5 py-2 font-semibold transition duration-300 hover:scale-105 cursor-pointer"
-        >
-          <span>Logout</span>
-          <img src="/image/logout.svg" alt="Coin Icon" className="size-4 object-cover" />
-        </div>
-      </ul>
+  <div className="dropdown dropdown-bottom dropdown-end">
+    <div
+      tabIndex={0}
+      role="button"
+      className="rounded-full size-12 overflow-hidden cursor-pointer"
+    >
+      <img
+        src={user && user.foto ? `/storage/${user.foto}` : "/image/default-avatar.png"}
+        alt="Avatar"
+        className="w-full h-full object-cover"
+      />
     </div>
+
+    <ul
+      tabIndex={0}
+      className="dropdown-content menu min-w-60 max-w-2xl min-h-40 bg-base-100 rounded-2xl z-1 mt-2 p-3 shadow-md"
+    >
+      <div className="flex items-center justify-start gap-4 max-w-2xl min-h-14 border-2 p-2 rounded-xl shadow-2xs">
+        <div className="rounded-full size-10 overflow-hidden">
+          <img
+            src={user && user.foto ? `/storage/${user.foto}` : "/image/default-avatar.png"}
+            alt="Avatar"
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <div className="flex-col">
+          <p className="font-semibold text-base">
+            {user ? `${user.nama_depan}` : "Loading..."}
+          </p>
+          <Link href="/wallet" className="flex flex-row items-center gap-2">
+            <img src="/image/coin.svg" alt="Coin Icon" className="size-5 object-cover" />
+            <p className="text-base">{user ? formatIDR(user.saldo) : "Rp 0,00"}</p>
+          </Link>
+        </div>
+      </div>
+
+      <Link
+        href="/purchasehistory"
+        className="bg-white hover:bg-pink hover:text-white rounded-3xl px-5 py-2 font-semibold transition duration-300 hover:scale-105 mt-4"
+      >
+        Riwayat Pembelian
+      </Link>
+      <Link
+        href="/settings"
+        className="bg-white hover:bg-pink hover:text-white rounded-3xl px-5 py-2 font-semibold transition duration-300 hover:scale-105"
+      >
+        Pengaturan
+      </Link>
+      <div
+        onClick={handleLogout}
+        className="flex justify-between pr-4 bg-white hover:bg-pink hover:text-white rounded-3xl px-5 py-2 font-semibold transition duration-300 hover:scale-105 cursor-pointer"
+      >
+        <span>Logout</span>
+        <img src="/image/logout.svg" alt="Logout Icon" className="size-4 object-cover" />
+      </div>
+    </ul>
+  </div>
+
   );
 }
 

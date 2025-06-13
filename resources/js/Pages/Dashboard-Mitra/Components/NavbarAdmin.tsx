@@ -96,16 +96,25 @@ function Profile({ user, loading, handleLogout }: any) {
       <div
         tabIndex={0}
         role="button"
-        className="btn rounded-full p-2 size-12 flex items-center justify-center"
+        className="btn rounded-full p-0 size-12 overflow-hidden"
       >
-        {/* Placeholder untuk trigger dropdown, bisa diganti dengan avatar */}
+        <img
+          src={user && user.foto ? `/storage/${user.foto}` : "/image/default-avatar.png"}
+          className="w-full h-full object-cover"
+        />
       </div>
       <ul
         tabIndex={0}
         className="dropdown-content menu min-w-60 max-w-2xl min-h-40 bg-base-100 rounded-2xl z-1 mt-2 p-3 shadow-md"
       >
         <div className="flex items-center justify-start gap-4 max-w-2xl min-h-16 border-2 p-2 rounded-xl shadow-2xs mb-2">
-          <div className="rounded-full size-10 bg-gray-200"></div>
+          <div className="rounded-full size-10 overflow-hidden">
+            <img
+              src={user && user.foto ? `/storage/${user.foto}` : "/image/default-avatar.png"}
+              alt="Avatar"
+              className="w-full h-full object-cover"
+            />
+          </div>
           <div className="flex-col">
             <p className="font-semibold text-base">
               {loading ? "Loading..." : user ? user.nama_depan : "Guest"}

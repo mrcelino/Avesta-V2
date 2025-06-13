@@ -15,6 +15,7 @@ interface InfoCardProps {
 interface Warung {
   id_warung: number;
   nama_warung: string;
+  foto_warung: string | null;
   alamat_warung: string;
   kelurahan: string;
   unggas: Product[];
@@ -73,9 +74,9 @@ export default function Toko() {
       <div className="container w-full p-2 mx-auto flex flex-col min-h-screen">
         <div className="bg-white flex items-center space-x-6 mt-28 mb-6">
           <img
-            alt="A woman and a child standing in front of a meat counter"
+            alt="Foto Warung"
             className="size-40 rounded-[28px] object-cover"
-            src="https://storage.googleapis.com/a1aa/image/LhjregsBbaQOX6eL5uDGJKysqjbQ1KPZreVRI85jMe2GJ2DPB.jpg"
+            src={`/storage/${warung.foto_warung}`}
           />
           <div className="flex flex-col gap-2">
             <h2 className="text-2xl font-bold">{warung.nama_warung}</h2>
