@@ -152,12 +152,13 @@ const CartProvider: React.FC<PropsWithChildren> = ({ children }) => {
       setCart((prevCart) => {
           const existingItem = prevCart.find((item) => item.id_unggas === product.id_unggas);
           if (existingItem) {
-              const newCart = prevCart.map((item) =>
-                  item.id_unggas === product.id_unggas
-                      ? { ...item, quantity: item.quantity + quantity }
-                      : item
-              );
-              return newCart;
+            const newQuantity = existingItem.quantity + quantity;
+            if (newQuantity > product.stok) return prevCart;
+            return prevCart.map((item) =>
+              item.id_unggas === product.id_unggas
+                ? { ...item, quantity: newQuantity }
+                : item
+            );
           }
           const newItem = { ...product, quantity, catatan: "" };
           return [...prevCart, newItem];
@@ -168,7 +169,9 @@ const CartProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const updateQuantity = (id_unggas: number, quantity: number) => {
       setCart((prevCart) =>
           prevCart.map((item) =>
-              item.id_unggas === id_unggas ? { ...item, quantity: Math.max(1, quantity) } : item
+          item.id_unggas === id_unggas
+            ? { ...item, quantity: Math.max(1, Math.min(quantity, item.stok)) }
+          : item
           )
       );
   };
