@@ -23,7 +23,7 @@ export default function Karyawan() {
     useEffect(() => {
         const fetchKaryawan = async () => {
             if (!warungId) {
-                setError("Warung ID tidak ditemukan di localStorage");
+                setError("Toko belum tersedia, silakan buat toko terlebih dahulu.");
                 setLoading(false);
                 return;
             }
@@ -118,16 +118,18 @@ export default function Karyawan() {
             <div className="min-h-screen">
                 <div className="flex justify-between items-center mb-4">
                     <h1 className="text-2xl font-bold mb-1">Daftar Karyawan</h1>
-                    <Link
-                        href="/admin/tambah-karyawan"
-                        className="bg-pink text-white px-4 py-2 rounded-xl font-semibold transition duration-200 cursor-pointer"
-                    >
-                        Tambah Karyawan
-                    </Link>
+                    {!error && (
+                        <Link
+                            href="/admin/tambah-karyawan"
+                            className="bg-pink text-white px-4 py-2 rounded-xl font-semibold transition duration-200 cursor-pointer"
+                        >
+                            Tambah Karyawan
+                        </Link>
+                    )}
                 </div>
 
                 {loading && <p className="text-center">Memuat...</p>}
-                {error && <p className="text-center text-red-600">{error}</p>}
+                {error && <p className="text-center text-gray-400">{error}</p>}
                 {!loading && !error && (
                     <div className="overflow-auto rounded-xl border">
                         <table className="w-full text-left table-auto">
