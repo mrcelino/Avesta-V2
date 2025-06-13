@@ -55,11 +55,11 @@ const Register = () => {
 
   return (
     <div
-      className="flex items-center justify-center min-h-screen text-black"
+      className="flex items-center justify-center min-h-screen text-black p-4 md:p-0"
       style={{ backgroundImage: `url('/image/bghero.png')` }}
     >
-      <div className="bg-white rounded-3xl shadow-lg p-12 flex" style={{ width: '1000px' }}>
-        <div className="w-5/12 flex items-center justify-center rounded-3xl bg-[#F99BA9]">
+      <div className="bg-white rounded-3xl shadow-lg md:p-12 flex" style={{ width: '1000px' }}>
+        <div className="w-5/12 hidden md:flex items-center justify-center rounded-3xl bg-[#F99BA9]">
           <img
             alt="Illustration of two people shaking hands with documents flying around"
             className="rounded-lg p-10"
@@ -68,7 +68,7 @@ const Register = () => {
             width={400}
           />
         </div>
-        <div className="w-7/12 pl-16">
+        <div className="w-full md:w-7/12 md:pl-16 p-3">
           <img
             alt="Avesta logo"
             className="mb-4 mx-auto"
@@ -76,15 +76,15 @@ const Register = () => {
             src="/image/avesta.png"
             width={100}
           />
-          <h1 className="text-2xl font-bold mb-2 text-center">Yuk, Gabung dengan Avesta!</h1>
-          <p className="mb-6 font-semibold text-center">
-            Dapatkan harga ayam potong paling oke dan <br /> rasakan mudahnya pesan online setiap hari!
+          <h1 className="text-sm md:text-2xl font-bold mb-2 text-center">Yuk, Gabung dengan Avesta!</h1>
+          <p className="text-xs md:text-base mb-6 font-medium text-center">
+            Dapatkan harga ayam potong paling oke dan rasakan mudahnya pesan online setiap hari!
           </p>
           <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <input
-                  className="border border-gray-300 rounded-2xl p-3 pl-4 bg-cInput w-full"
+                  className="border border-gray-300 rounded-2xl text-xs md:text-base p-3 pl-4 bg-cInput w-full"
                   placeholder="Nama Depan"
                   type="text"
                   value={form.nama_depan}
@@ -95,7 +95,7 @@ const Register = () => {
               </div>
               <div>
                 <input
-                  className="border border-gray-300 rounded-2xl p-3 pl-4 bg-cInput w-full"
+                  className="border border-gray-300 rounded-2xl text-xs md:text-base p-3 pl-4 bg-cInput w-full"
                   placeholder="Nama Belakang"
                   type="text"
                   value={form.nama_belakang}
@@ -108,7 +108,7 @@ const Register = () => {
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <input
-                  className="border border-gray-300 rounded-2xl p-3 pl-4 w-full bg-cInput"
+                  className="border border-gray-300 rounded-2xl text-xs md:text-base p-3 pl-4 bg-cInput w-full"
                   placeholder="Email"
                   type="email"
                   value={form.email}
@@ -119,7 +119,7 @@ const Register = () => {
               </div>
               <div>
                 <input
-                  className="border border-gray-300 rounded-2xl p-3 pl-4 w-full bg-cInput"
+                  className="border border-gray-300 rounded-2xl text-xs md:text-base p-3 pl-4 bg-cInput w-full"
                   placeholder="Nomor HP"
                   type="text"
                   value={form.no_telepon}
@@ -131,7 +131,7 @@ const Register = () => {
             </div>
             <div className="mb-4">
               <input
-                className="border border-gray-300 rounded-2xl p-3 pl-4 w-full bg-cInput"
+                className="border border-gray-300 rounded-2xl text-xs md:text-base p-3 pl-4 bg-cInput w-full"
                 placeholder="Sandi"
                 type="password"
                 value={form.password}
@@ -142,7 +142,7 @@ const Register = () => {
             </div>
             <div className="mb-4">
               <input
-                className="border border-gray-300 rounded-2xl p-3 pl-4 w-full bg-cInput"
+                className="border border-gray-300 rounded-2xl text-xs md:text-base p-3 pl-4 bg-cInput w-full"
                 placeholder="Konfirmasi Kata Sandi"
                 type="password"
                 value={form.password_confirmation}
@@ -151,20 +151,20 @@ const Register = () => {
               />
             </div>
             <div className="mb-4 flex items-center">
-              <input id="terms" type="checkbox" className="mr-2" required />
-              <label htmlFor="terms" className="text-sm font-semibold">
+              <input id="terms" type="checkbox" className="mr-2 rounded-full" required />
+              <label htmlFor="terms" className="text-xs md:text-sm  font-medium md:font-semibold">
                 Saya setuju dengan semua ketentuan dan kebijakan privasi
               </label>
             </div>
             <button
               type="submit"
-              className="bg-pink text-white rounded-2xl p-3 w-full font-medium"
+              className="bg-pink text-white rounded-2xl p-2 text-sm md:text-base w-full font-medium"
               disabled={processing}
             >
               {processing ? 'Memproses...' : 'Buat Akun'}
             </button>
           </form>
-          <p className="text-center text-sm mt-10">
+          <p className="text-center text-xs md:text-sm mt-4 md:mt-10">
             Sudah punya akun?{' '}
             <Link href="/login" className="text-heading">
               Masuk

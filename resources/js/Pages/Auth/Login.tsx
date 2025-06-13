@@ -56,11 +56,11 @@ const Login = ({ errors }: { errors: Errors }) => {
 
     return (
         <div
-            className="bg-pink flex items-center justify-center min-h-screen text-black"
+            className="bg-pink flex items-center justify-center min-h-screen text-black p-4 md:p-0"
             style={{ backgroundImage: `url('/image/bghero.png')` }}
         >
             <div
-                className="bg-white rounded-3xl shadow-lg p-12 flex"
+                className="bg-white rounded-3xl shadow-lg md:p-12 flex"
                 style={{ width: "1000px" }}
             >
                 <div className="w-5/12 hidden md:flex items-center justify-center rounded-3xl bg-[#F99BA9]">
@@ -72,25 +72,25 @@ const Login = ({ errors }: { errors: Errors }) => {
                         width={400}
                     />
                 </div>
-                <div className="w-7/12 pl-16">
+                <div className="w-full md:w-7/12 md:pl-16 p-3">
                     <img
                         alt="Avesta logo"
-                        className="mb-4 mx-auto"
+                        className="md:mb-4 mx-auto"
                         height={40}
                         src="/image/avesta.png"
                         width={100}
                     />
-                    <h1 className="text-2xl font-bold mb-2 text-center">
+                    <h1 className="text-sm md:text-2xl font-bold mb-2 text-center">
                         Yuk, Gabung dengan Avesta!
                     </h1>
-                    <p className="mb-6 font-semibold text-center">
-                        Dapatkan harga ayam potong paling oke dan <br /> rasakan
+                    <p className="text-xs md:text-base mb-6 font-medium text-center">
+                        Dapatkan harga ayam potong paling oke dan rasakan
                         mudahnya pesan online setiap hari!
                     </p>
                     <form onSubmit={handleSubmit}>
                         <div className="mb-4">
                             <input
-                                className="border border-gray-300 rounded-2xl p-2 w-full bg-cInput"
+                                className="border border-gray-300 rounded-2xl text-sm md:text-base md:p-2 w-full bg-cInput"
                                 placeholder="Email"
                                 type="email"
                                 value={data.email}
@@ -107,7 +107,7 @@ const Login = ({ errors }: { errors: Errors }) => {
                         </div>
                         <div className="mb-4">
                             <input
-                                className="border border-gray-300 rounded-2xl p-2 w-full bg-cInput"
+                                className="border border-gray-300 rounded-2xl text-sm md:text-base p-2 w-full bg-cInput"
                                 placeholder="Sandi"
                                 type="password"
                                 value={data.password}
@@ -121,30 +121,30 @@ const Login = ({ errors }: { errors: Errors }) => {
                             <input
                                 id="terms"
                                 type="checkbox"
-                                className="mr-2"
+                                className="mr-2 rounded-full"
                             />
                             <label
                                 htmlFor="terms"
-                                className="text-sm font-semibold"
+                                className="text-xs md:text-sm font-semibold"
                             >
                                 Ingat saya
                             </label>
                             <Link
                                 href="/forgotpassword"
-                                className="ml-auto text-sm text-heading"
+                                className="text-xs ml-auto md:text-sm text-heading"
                             >
                                 Lupa Password
                             </Link>
                         </div>
                         <button
                             type="submit"
-                            className="bg-pink text-white rounded-2xl p-2 w-full font-medium"
+                            className="bg-pink text-white rounded-2xl p-2 text-sm md:text-base w-full font-medium"
                             disabled={processing}
                         >
                             {processing ? "Memproses..." : "Login"}
                         </button>
                     </form>
-                    <p className="text-center text-sm mt-40">
+                    <p className="text-center mt-4 text-xs md:text-sm md:mt-40">
                         Belum punya akun?{" "}
                         <Link href="/register" className="text-heading">
                             Daftar
