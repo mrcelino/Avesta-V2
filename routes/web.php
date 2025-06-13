@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\WarungController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Middleware\RedirectIfAuthenticatedGuestOnly;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -12,12 +13,15 @@ Route::middleware('guest')->group(function () {
     Route::get('/register/{role?}', [RegisterController::class, 'show'])->name('register');
 });
 
-Route::group([], function () {
+Route::middleware(RedirectIfAuthenticatedGuestOnly::class)->group(function () {
     Route::get('/', fn () => Inertia::render('Welcome'));
-    Route::get('/forgotpassword', fn () => Inertia::render('Guest/ForgotPassword'));
     Route::get('/contact', fn () => Inertia::render('Guest/Contact'));
     Route::get('/about', fn () => Inertia::render('Guest/About'));
     Route::get('/product', fn () => Inertia::render('Guest/Product'));
+});
+
+Route::group([], function () {
+    Route::get('/forgotpassword', fn () => Inertia::render('Guest/ForgotPassword'));
     Route::get('/mitra', fn () => Inertia::render('Guest-Mitra/Home'));
     Route::get('/mitra/about', fn () => Inertia::render('Guest-Mitra/About'));
     Route::get('/mitra/contact', fn () => Inertia::render('Guest-Mitra/Contact'));
@@ -58,7 +62,7 @@ Route::middleware(['auth:sanctum', 'App\Http\Middleware\RoleMiddleware:karyawan,
 });
 
 // Rute untuk Buyer (hanya untuk role user)
-Route::middleware(['auth:sanctum', 'App\Http\Middleware\RoleMiddleware:pemilik'])->group(function () {
+Route::middleware(['auth:sanctum', 'App\Http\Middleware\RoleMiddleware:user'])->group(function () {
     Route::get('/wallet', fn () => Inertia::render('Buyer/Wallet'));
     Route::get('/dashboard', fn () => Inertia::render('Buyer/Dashboard'));
     Route::get('/cariayam', fn () => Inertia::render('Buyer/CariAyam'));

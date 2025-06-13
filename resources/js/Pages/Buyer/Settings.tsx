@@ -22,7 +22,7 @@ export default function Settings() {
 }
 
 function SettingsContent() {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
 
   const [formData, setFormData] = useState<FormData>({
     nama_depan: "",
@@ -37,7 +37,6 @@ function SettingsContent() {
 
   const [previewFoto, setPreviewFoto] = useState<string | null>(null);
   const [updateLoading, setUpdateLoading] = useState(false);
-  // state untuk kontrol modal sukses & error
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
 
@@ -75,7 +74,6 @@ function SettingsContent() {
     if (!user) return;
 
     setUpdateLoading(true);
-    // reset modal
     setShowSuccessModal(false);
     setShowErrorModal(false);
 
@@ -91,10 +89,14 @@ function SettingsContent() {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       });
-      // kalau sukses tampilkan modal
+
+      const updatedUser = response.data.user;
+      if (updatedUser) {
+        setUser(updatedUser);
+      }
+
       setShowSuccessModal(true);
     } catch (error: any) {
-      // kalau error tampilkan modal error
       setShowErrorModal(true);
     } finally {
       setUpdateLoading(false);
@@ -108,7 +110,9 @@ function SettingsContent() {
   if (!user) {
     return (
       <div className="container min-h-screen pt-24 mx-36 mb-20 flex justify-center items-center">
-        <p className="text-lg font-semibold text-red-600">Pengguna tidak ditemukan. Silakan login ulang.</p>
+        <p className="text-lg font-semibold text-red-600">
+          Pengguna tidak ditemukan. Silakan login ulang.
+        </p>
       </div>
     );
   }
