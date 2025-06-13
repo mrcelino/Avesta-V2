@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, usePage } from "@inertiajs/react";
-import { useAuth } from "@/Layouts/AuthLayout";
 import axios from "axios";
 
 interface NavItemProps {
@@ -12,7 +11,7 @@ interface AuthButtonsProps {
   registerHref: string;
 }
 
-// Interface untuk data pengguna (sesuaikan dengan struktur dari useAuth)
+// Interface untuk data pengguna
 interface User {
   nama_depan: string;
   saldo: number;
@@ -91,12 +90,34 @@ const NavItem = ({ href, children }: NavItemProps) => (
 );
 
 const AuthButtons = ({ registerHref }: AuthButtonsProps) => {
-  const { user } = useAuth();
-  console.log("AuthButtons component rendered, user:", user);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get("/api/me", { withCredentials: true });
+        console.log("User data fetched:", response.data);
+        setUser(response.data.user);
+      } catch (error: any) {
+        console.log("Not logged in or error:", error.response?.status);
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  if (isLoading) {
+    // Tampilkan placeholder selama loading
+    return <div className="w-20 h-8 animate-pulse bg-gray-200 rounded-3xl"></div>;
+  }
 
   if (user) {
     // Jika sudah login, tampilkan Profile
-    return <Profile />;
+    return <Profile user={user} setUser={setUser} />;
   }
 
   // Jika belum login, tampilkan tombol Masuk dan Daftar
@@ -119,9 +140,7 @@ const AuthButtons = ({ registerHref }: AuthButtonsProps) => {
 };
 
 // Komponen Profile
-const Profile = () => {
-  const { user, setUser } = useAuth();
-
+const Profile = ({ user, setUser }: { user: User; setUser: (user: User | null) => void }) => {
   const handleLogout = async () => {
     try {
       await axios.post("/api/logout", {}, { withCredentials: true });
@@ -142,7 +161,7 @@ const Profile = () => {
         className="rounded-full size-12 overflow-hidden cursor-pointer"
       >
         <img
-          src={user && user.foto ? `/storage/${user.foto}` : "/image/default-avatar.png"}
+          src={user.foto ? `/storage/${user.foto}` : "/image/default-avatar.png"}
           alt="Avatar"
           className="w-full h-full object-cover"
         />
@@ -155,18 +174,16 @@ const Profile = () => {
         <div className="flex items-center justify-start gap-4 max-w-2xl min-h-14 border-2 p-2 rounded-xl shadow-2xs">
           <div className="rounded-full size-10 overflow-hidden">
             <img
-              src={user && user.foto ? `/storage/${user.foto}` : "/image/default-avatar.png"}
+              src={user.foto ? `/storage/${user.foto}` : "/image/default-avatar.png"}
               alt="Avatar"
               className="w-full h-full object-cover"
             />
           </div>
           <div className="flex-col">
-            <p className="font-semibold text-base">
-              {user ? `${user.nama_depan}` : "Loading..."}
-            </p>
+            <p className="font-semibold text-base">{user.nama_depan || "Loading..."}</p>
             <Link href="/wallet" className="flex flex-row items-center gap-2">
               <img src="/image/coin.svg" alt="Coin Icon" className="size-5 object-cover" />
-              <p className="text-base">{user ? formatIDR(Number(user.saldo)) : "Rp 0,00"}</p>
+              <p className="text-base">{formatIDR(Number(user.saldo))}</p>
             </Link>
           </div>
         </div>
