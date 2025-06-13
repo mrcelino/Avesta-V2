@@ -17,12 +17,15 @@ interface Product {
     alamat_warung: string;
     kelurahan: string;
     foto_warung: string;
+    latitude: string | null;
+    longitude: string | null;
   };
 }
 
 const ProductCard = ({ product }: { product: Product }) => {
   const [quantity, setQuantity] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // State untuk pesan error
   const { addToCart, showSwitchStoreModal, setShowSwitchStoreModal, clearCart, checkStoreMatch } = useCart();
 
   useEffect(() => {
@@ -49,13 +52,19 @@ const ProductCard = ({ product }: { product: Product }) => {
     })}`;
   };
 
-  const handleIncrease = () => setQuantity(quantity + 1);
+  const handleIncrease = () => setQuantity(quantity + 1); // Tidak cek stok
   const handleDecrease = () => setQuantity(Math.max(1, quantity - 1));
 
   const handleAddToCart = () => {
+    if (quantity > product.stok) {
+      setErrorMessage(`Stok hanya ${product.stok}. Tidak bisa memesan lebih!`);
+      setTimeout(() => setErrorMessage(null), 3000); // Hilangkan error setelah 3 detik
+      return;
+    }
     addToCart(product, quantity);
     setQuantity(1);
     setIsModalOpen(false);
+    setErrorMessage(null); // Reset error
   };
 
   const handleClearCartAndAdd = () => {
@@ -164,12 +173,18 @@ const ProductCard = ({ product }: { product: Product }) => {
                     </div>
                   </div>
                 </div>
-                <button
-                  onClick={handleAddToCart}
-                  className="bg-pink text-white w-full py-2 font-semibold rounded-xl"
-                >
-                  Tambah ke keranjang
-                </button>
+                <div>
+                  {/* Pesan Error */}
+                  {errorMessage && (
+                    <p className="text-red-500 text-sm mb-2 text-center">{errorMessage}</p>
+                  )}
+                  <button
+                    onClick={handleAddToCart}
+                    className="bg-pink text-white w-full py-2 font-semibold rounded-xl"
+                  >
+                    Tambah ke keranjang
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -177,16 +192,14 @@ const ProductCard = ({ product }: { product: Product }) => {
         </div>
       )}
 
-      {/* Modal Konfirmasi Ganti Toko (Custom) */}
+      {/* Modal Konfirmasi Ganti Toko */}
       {showSwitchStoreModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          {/* Backdrop dengan blur */}
           <div
             className="absolute inset-0 bg-black/5"
             onClick={() => setShowSwitchStoreModal(false)}
           ></div>
-          {/* Modal Content */}
-          <div className="flex flex-col gap-4 items-center justify-center relative bg-white rounded-3xl max-w-xl  w-full p-6 shadow-lg">
+          <div className="flex flex-col gap-4 items-center justify-center relative bg-white rounded-3xl max-w-xl w-full p-6 shadow-lg">
             <button
               className="btn btn-circle text-xl btn-ghost absolute right-2 top-2 text-pink"
               onClick={() => setShowSwitchStoreModal(false)}
@@ -201,19 +214,19 @@ const ProductCard = ({ product }: { product: Product }) => {
               Jika ya, kami akan menyesuaikan pesanan dengan menghapus produk sebelumnya. Mohon konfirmasinya
             </h3>
             <div className="flex w-full justify-between space-x-2">
-                <button
-                  onClick={() => setShowSwitchStoreModal(false)}
-                  className="btn btn-sm btn-outline w-1/2 text-pink hover:bg-gray-100 rounded-xl border-pink border-2"
-                >
-                  Batal
-                </button>
-                <button
-                  onClick={handleClearCartAndAdd}
-                  className="btn btn-sm w-1/2 bg-pink text-white hover:bg-pink rounded-xl"
-                >
-                  Konfirmasi
-                </button>
-              </div>
+              <button
+                onClick={() => setShowSwitchStoreModal(false)}
+                className="btn btn-sm btn-outline w-1/2 text-pink hover:bg-gray-100 rounded-xl border-pink border-2"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleClearCartAndAdd}
+                className="btn btn-sm w-1/2 bg-pink text-white hover:bg-pink rounded-xl"
+              >
+                Konfirmasi
+              </button>
+            </div>
           </div>
         </div>
       )}

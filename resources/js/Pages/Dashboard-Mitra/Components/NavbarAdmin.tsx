@@ -138,7 +138,7 @@ function Profile({ user, loading, handleLogout }: any) {
           href="/admin/wallet"
           className="bg-white hover:bg-pink hover:text-white rounded-3xl px-5 py-2 font-semibold transition duration-300 hover:scale-105"
         >
-          Dompet
+          AvestaPay
         </Link>
         <div
           onClick={handleLogout}

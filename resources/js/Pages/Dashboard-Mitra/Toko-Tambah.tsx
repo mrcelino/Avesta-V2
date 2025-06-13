@@ -159,8 +159,7 @@ export default function TokoTambah() {
             setFormData(initialData);
             setPreview(null);
             setErrors({});
-            // Pengen set local storage "warungid" sesuai dengan id_warung yang ditambahkan
-            // router.visit("/admin/toko");
+            router.visit("/admin/toko");
         } catch (error: any) {
             if (error.response?.status === 422) {
                 setErrors(error.response.data.errors || {});
