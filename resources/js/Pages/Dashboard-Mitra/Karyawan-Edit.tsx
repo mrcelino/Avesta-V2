@@ -44,7 +44,12 @@ export default function KaryawanEdit() {
                     no_telepon: karyawan.no_telepon,
                     email: karyawan.email,
                 });
-                setInitialFoto(karyawan.foto || "https://i.pravatar.cc/40?img=1");
+                // Tambahin prefix /storage/ ke path foto
+                const fotoUrl = karyawan.foto
+                    ? `/storage/${karyawan.foto}`
+                    : "https://i.pravatar.cc/40?img=1";
+                console.log("Setting initialFoto:", fotoUrl); // Debugging
+                setInitialFoto(fotoUrl);
             } catch (e: any) {
                 setError(e.response?.data.message || "Gagal memuat data karyawan");
                 console.error("Error fetching karyawan:", e.response?.data || e);

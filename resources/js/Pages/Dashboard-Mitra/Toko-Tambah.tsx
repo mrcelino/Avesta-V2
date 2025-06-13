@@ -89,8 +89,9 @@ export default function TokoTambah() {
     useEffect(() => {
         if (!isMapOpen) return;
 
-        const lat = parseFloat(formData.latitude) || -6.2;
-        const lng = parseFloat(formData.longitude) || 106.816666;
+        const lat = parseFloat(formData.latitude) || -7.7705;
+        const lng = parseFloat(formData.longitude) || 110.3771;
+
 
         const redIcon = new L.Icon({
             iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
@@ -147,13 +148,19 @@ export default function TokoTambah() {
 
         try {
             await axios.get('/sanctum/csrf-cookie');
-            await axios.post("/api/tambah-toko", data, {
+            const response = await axios.post("/api/tambah-toko", data, {
                 headers: { "Accept": "application/json" },
             });
+            console.log("Toko berhasil ditambahkan:", response.data);
+            const idWarung = response.data.id_warung;
+            if (idWarung) {
+                localStorage.setItem("warungId", idWarung.toString());
+            }
             setFormData(initialData);
             setPreview(null);
             setErrors({});
-            router.visit("/admin/toko");
+            // Pengen set local storage "warungid" sesuai dengan id_warung yang ditambahkan
+            // router.visit("/admin/toko");
         } catch (error: any) {
             if (error.response?.status === 422) {
                 setErrors(error.response.data.errors || {});

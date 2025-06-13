@@ -92,8 +92,8 @@ export default function TokoEdit() {
 useEffect(() => {
   if (!isMapOpen) return;
 
-  const lat = parseFloat(formData.latitude) || -6.2;
-  const lng = parseFloat(formData.longitude) || 106.816666;
+  const lat = parseFloat(formData.latitude) || -7.7705;
+  const lng = parseFloat(formData.longitude) || 110.3771;
 
   const redIcon = new L.Icon({
     iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",

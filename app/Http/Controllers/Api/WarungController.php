@@ -188,7 +188,10 @@ public function store(Request $request)
                 return response()->json(['error' => 'User tidak ditemukan'], 404);
             }
 
-            return response()->json(['message' => 'Toko berhasil ditambahkan!'], 200);
+            return response()->json([
+                'message' => 'Toko berhasil ditambahkan!',
+                'id_warung' => $warung->id_warung,
+            ], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Terjadi kesalahan di server: ' . $e->getMessage()], 500);
         }

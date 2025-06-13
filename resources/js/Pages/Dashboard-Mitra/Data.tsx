@@ -115,13 +115,15 @@ const KategoriChartComponent: React.FC<KategoriChartComponentProps> = ({ data })
             chartInstance.current.destroy();
         }
 
-        // Definisikan semua kategori yang harus ditampilkan
+        // Definisikan semua kategori
         const allCategories = ["Ayam Utuh", "Dada Ayam", "Ceker Ayam", "Ayam Fillet", "Jeroan"];
         
-        // Normalisasi data: pastikan semua kategori ada, dengan order_count 0 jika tidak ada di API
+        // Pastikan data adalah array, jika tidak, gunakan array kosong
+        const validData = Array.isArray(data) ? data : [];
+
+        // Normalisasi data
         const normalizedData = allCategories.map((category) => {
-            const apiCategory = data.find((item) => {
-                // Ubah Ceker dari API jadi Ceker Ayam
+            const apiCategory = validData.find((item) => {
                 const normalizedApiCategory = item.kategori === "Ceker" ? "Ceker Ayam" : 
                                             item.kategori === "Dada" ? "Dada Ayam" : 
                                             item.kategori === "Fillet" ? "Ayam Fillet" : item.kategori;
@@ -182,6 +184,7 @@ const KategoriChartComponent: React.FC<KategoriChartComponentProps> = ({ data })
                     },
                 },
             },
+
         });
     }, [data]);
 
