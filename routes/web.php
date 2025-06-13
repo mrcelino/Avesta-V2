@@ -23,7 +23,8 @@ Route::group([], function () {
     Route::get('/mitra/contact', fn () => Inertia::render('Guest-Mitra/Contact'));
 });
 
-Route::group([], function () {
+// Rute untuk Dashboard-Mitra (hanya untuk role pemilik)
+Route::middleware(['auth:sanctum', 'App\Http\Middleware\RoleMiddleware:pemilik'])->group(function () {
     Route::get('/admin', fn () => Inertia::render('Dashboard-Mitra/Dashboard'));
     Route::get('/admin/data', fn () => Inertia::render('Dashboard-Mitra/Data'));
     Route::get('/admin/karyawan', fn () => Inertia::render('Dashboard-Mitra/Karyawan'));
@@ -46,8 +47,18 @@ Route::group([], function () {
     Route::get('/admin/withdraw', fn () => Inertia::render('Dashboard-Mitra/Admin-Withdraw'));
 });
 
+Route::middleware(['auth:sanctum', 'App\Http\Middleware\RoleMiddleware:karyawan, pemilik'])->group(function () {
+    Route::get('/admin', fn () => Inertia::render('Dashboard-Mitra/Dashboard'));
+    Route::get('/admin/produk', fn () => Inertia::render('Dashboard-Mitra/Produk'));
+    Route::get('/admin/tambah-produk', fn () => Inertia::render('Dashboard-Mitra/Produk-Tambah'));
+    Route::get('/admin/edit-produk/{id_unggas}', fn ($id_unggas) => Inertia::render('Dashboard-Mitra/Produk-Edit', [
+        'id_unggas' => (int) $id_unggas,
+    ]));
+    Route::get('/admin/pesanan', fn () => Inertia::render('Dashboard-Mitra/Pesanan'));
+});
 
-Route::middleware(['auth:sanctum'])->group(function () {
+// Rute untuk Buyer (hanya untuk role user)
+Route::middleware(['auth:sanctum', 'App\Http\Middleware\RoleMiddleware:pemilik'])->group(function () {
     Route::get('/wallet', fn () => Inertia::render('Buyer/Wallet'));
     Route::get('/dashboard', fn () => Inertia::render('Buyer/Dashboard'));
     Route::get('/cariayam', fn () => Inertia::render('Buyer/CariAyam'));
@@ -61,4 +72,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/warungs/{id}', [WarungController::class, 'page'])->name('warungs.show');
     Route::get('/purchasehistory', fn() => Inertia::render('Buyer/PurchaseHistory'));
     Route::get('/pickup', fn () => Inertia::render('Buyer/Pickup'));
+});
+
+
+Route::fallback(function () {
+    return Inertia::render('404');  // nama komponen React kamu di resources/js/Pages/404.tsx
 });

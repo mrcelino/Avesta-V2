@@ -96,7 +96,7 @@ const AuthButtons = ({ registerHref }: AuthButtonsProps) => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get("/api/me", { withCredentials: true });
+        const response = await axios.get<{ user: User }>("/api/me", { withCredentials: true });
         console.log("User data fetched:", response.data);
         setUser(response.data.user);
       } catch (error: any) {
@@ -112,7 +112,7 @@ const AuthButtons = ({ registerHref }: AuthButtonsProps) => {
 
   if (isLoading) {
     // Tampilkan placeholder selama loading
-    return <div className="w-20 h-8 animate-pulse bg-gray-200 rounded-3xl"></div>;
+    return <div className="w-12 h-12 rounded-full animate-pulse bg-gray-200"></div>;
   }
 
   if (user) {
@@ -141,6 +141,8 @@ const AuthButtons = ({ registerHref }: AuthButtonsProps) => {
 
 // Komponen Profile
 const Profile = ({ user, setUser }: { user: User; setUser: (user: User | null) => void }) => {
+  const [imageError, setImageError] = useState(false); // State untuk handle error gambar
+
   const handleLogout = async () => {
     try {
       await axios.post("/api/logout", {}, { withCredentials: true });
@@ -151,19 +153,19 @@ const Profile = ({ user, setUser }: { user: User; setUser: (user: User | null) =
     }
   };
 
-  console.log("Profile component rendered, user:", user);
-
   return (
     <div className="dropdown dropdown-bottom dropdown-end">
       <div
         tabIndex={0}
         role="button"
-        className="rounded-full size-12 overflow-hidden cursor-pointer"
+        className="rounded-full w-12 h-12 overflow-hidden cursor-pointer bg-gray-200"
       >
         <img
-          src={user.foto ? `/storage/${user.foto}` : "/image/default-avatar.png"}
+          src={imageError || !user.foto ? "/image/default-avatar.png" : `/storage/${user.foto}`}
           alt="Avatar"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover aspect-square"
+          loading="lazy"
+          onError={() => setImageError(true)}
         />
       </div>
 
@@ -172,11 +174,13 @@ const Profile = ({ user, setUser }: { user: User; setUser: (user: User | null) =
         className="dropdown-content menu min-w-60 max-w-2xl min-h-40 bg-base-100 rounded-2xl z-1 mt-2 p-3 shadow-md"
       >
         <div className="flex items-center justify-start gap-4 max-w-2xl min-h-14 border-2 p-2 rounded-xl shadow-2xs">
-          <div className="rounded-full size-10 overflow-hidden">
+          <div className="rounded-full w-10 h-10 overflow-hidden bg-gray-200">
             <img
-              src={user.foto ? `/storage/${user.foto}` : "/image/default-avatar.png"}
+              src={imageError || !user.foto ? "/image/default-avatar.png" : `/storage/${user.foto}`}
               alt="Avatar"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover aspect-square"
+              loading="lazy"
+              onError={() => setImageError(true)}
             />
           </div>
           <div className="flex-col">
