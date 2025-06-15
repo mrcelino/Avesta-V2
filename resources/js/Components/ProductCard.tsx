@@ -25,8 +25,17 @@ interface Product {
 const ProductCard = ({ product }: { product: Product }) => {
   const [quantity, setQuantity] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null); // State untuk pesan error
-  const { addToCart, showSwitchStoreModal, setShowSwitchStoreModal, clearCart, checkStoreMatch } = useCart();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const {
+    addToCart,
+    showSwitchStoreModal,
+    setShowSwitchStoreModal,
+    clearCart,
+    checkStoreMatch,
+    pendingProduct,
+    pendingQuantity,
+    setPendingProduct,
+  } = useCart();
 
   useEffect(() => {
     if (showSwitchStoreModal) {
@@ -52,25 +61,43 @@ const ProductCard = ({ product }: { product: Product }) => {
     })}`;
   };
 
-  const handleIncrease = () => setQuantity(quantity + 1); // Tidak cek stok
-  const handleDecrease = () => setQuantity(Math.max(1, quantity - 1));
+  const handleIncrease = () => {
+    if (pendingProduct) {
+      setPendingProduct(pendingProduct, pendingQuantity + 1);
+    } else {
+      setQuantity((prev) => prev + 1);
+    }
+  };
+
+  const handleDecrease = () => {
+    if (pendingProduct) {
+      setPendingProduct(pendingProduct, Math.max(1, pendingQuantity - 1));
+    } else {
+      setQuantity((prev) => Math.max(1, prev - 1));
+    }
+  };
 
   const handleAddToCart = () => {
-    if (quantity > product.stok) {
-      setErrorMessage(`Stok hanya ${product.stok}. Tidak bisa memesan lebih!`);
-      setTimeout(() => setErrorMessage(null), 3000); // Hilangkan error setelah 3 detik
+    const targetProduct = pendingProduct || product;
+    const targetQuantity = pendingProduct ? pendingQuantity : quantity;
+
+    if (targetQuantity > targetProduct.stok) {
+      setErrorMessage(`Stok hanya ${targetProduct.stok} kg. Tidak bisa memesan lebih!`);
+      setTimeout(() => setErrorMessage(null), 3000);
       return;
     }
-    addToCart(product, quantity);
+
+    addToCart(targetProduct, targetQuantity);
     setQuantity(1);
     setIsModalOpen(false);
-    setErrorMessage(null); // Reset error
+    setPendingProduct(null, 1); // Reset pending product
+    setErrorMessage(null);
   };
 
   const handleClearCartAndAdd = () => {
     clearCart();
     setShowSwitchStoreModal(false);
-    setIsModalOpen(true);
+    setIsModalOpen(true); // Buka modal dengan pendingProduct
   };
 
   const handleOrderClick = () => {
@@ -78,9 +105,13 @@ const ProductCard = ({ product }: { product: Product }) => {
     if (isStoreMatch) {
       setIsModalOpen(true);
     } else {
+      setPendingProduct(product, quantity); // Simpan produk sementara
       setShowSwitchStoreModal(true);
     }
   };
+
+  const displayProduct = pendingProduct || product;
+  const displayQuantity = pendingProduct ? pendingQuantity : quantity;
 
   return (
     <>
@@ -88,12 +119,12 @@ const ProductCard = ({ product }: { product: Product }) => {
         <img
           alt={`Image of ${product.jenis_unggas}`}
           className="rounded-xl w-full h-64 object-cover"
-          height="400"
+          height="2xl"
           src={`/storage/${product.foto_unggas}`}
-          width="600"
+          width="full"
         />
         <div className="py-2">
-          <h3 className="text-base font-medium">{product.jenis_unggas}</h3>
+          <h3 className="text-base font-semibold">{product.jenis_unggas}</h3>
           <p className="text-lg font-semibold">{formatPrice(product.harga_per_kg)}</p>
           {product.warung ? (
             <Link href={`/warungs/${product.warung.id_warung}`} className="text-sm">
@@ -128,33 +159,36 @@ const ProductCard = ({ product }: { product: Product }) => {
           <div className="modal-box max-w-3xl p-6 bg-white shadow-lg">
             <button
               className="btn btn-sm btn-circle text-xl btn-ghost absolute right-2 top-2 text-pink"
-              onClick={() => setIsModalOpen(false)}
+              onClick={() => {
+                setIsModalOpen(false);
+                setPendingProduct(null, 1); // Reset saat modal ditutup
+              }}
             >
               ✕
             </button>
-            <h3 className="text-lg font-semibold mb-2">Detail Produk</h3>
+            <h3 className="text-lg font-semibold mb-2">Detail Pesanan</h3>
             <div className="flex border-2 border-slate-200 rounded-2xl p-4">
               <div className="w-1/2">
                 <img
-                  alt={`Image of ${product.jenis_unggas}`}
+                  alt={`Image of ${displayProduct.jenis_unggas}`}
                   className="w-full h-full rounded-xl object-cover"
-                  src={`/storage/${product.foto_unggas}`}
+                  src={`/storage/${displayProduct.foto_unggas}`}
                 />
               </div>
               <div className="ml-4 w-1/2 flex flex-col justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">{product.jenis_unggas}</h3>
-                  <p className="font-normal">{product.deskripsi}</p>
+                  <h3 className="text-lg font-semibold mb-2">{displayProduct.jenis_unggas}</h3>
+                  <p className="font-normal">{displayProduct.deskripsi}</p>
                   <p className="text-xl font-semibold mt-2 mb-2">
-                    {formatPrice(product.harga_per_kg)}
+                    {formatPrice(displayProduct.harga_per_kg)}
                   </p>
-                  <p>{product.warung.nama_warung}</p>
+                  <p>{displayProduct.warung.nama_warung}</p>
                   <div className="flex items-center mt-1">
                     <span className="font-semibold">
-                      {product.penjualan} Terjual
+                      {displayProduct.penjualan} Terjual
                     </span>
                   </div>
-                  <p className="mt-1">Stok: {product.stok}</p>
+                  <p className="mt-1">Stok: {displayProduct.stok}</p>
                   <div className="flex flex-row space-x-2 mt-2 mb-4">
                     <div
                       onClick={handleDecrease}
@@ -163,7 +197,7 @@ const ProductCard = ({ product }: { product: Product }) => {
                       -
                     </div>
                     <div className="flex grow items-center justify-center rounded-lg border-2 size-8 text-base">
-                      {quantity}
+                      {displayQuantity}
                     </div>
                     <div
                       onClick={handleIncrease}
@@ -174,7 +208,6 @@ const ProductCard = ({ product }: { product: Product }) => {
                   </div>
                 </div>
                 <div>
-                  {/* Pesan Error */}
                   {errorMessage && (
                     <p className="text-red-500 text-sm mb-2 text-center">{errorMessage}</p>
                   )}
@@ -188,7 +221,13 @@ const ProductCard = ({ product }: { product: Product }) => {
               </div>
             </div>
           </div>
-          <div className="modal-backdrop" onClick={() => setIsModalOpen(false)}></div>
+          <div
+            className="modal-backdrop"
+            onClick={() => {
+              setIsModalOpen(false);
+              setPendingProduct(null, 1);
+            }}
+          ></div>
         </div>
       )}
 
@@ -197,25 +236,34 @@ const ProductCard = ({ product }: { product: Product }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div
             className="absolute inset-0 bg-black/5"
-            onClick={() => setShowSwitchStoreModal(false)}
+            onClick={() => {
+              setShowSwitchStoreModal(false);
+              setPendingProduct(null, 1);
+            }}
           ></div>
           <div className="flex flex-col gap-4 items-center justify-center relative bg-white rounded-3xl max-w-xl w-full p-6 shadow-lg">
             <button
               className="btn btn-circle text-xl btn-ghost absolute right-2 top-2 text-pink"
-              onClick={() => setShowSwitchStoreModal(false)}
+              onClick={() => {
+                setShowSwitchStoreModal(false);
+                setPendingProduct(null, 1);
+              }}
             >
               ✕
             </button>
             <h3 className="text-xl font-semibold mb-4 text-gray-800 mt-4">
-              Apakah Anda ingin beralih ke toko ini?
+              Apakah Anda ingin beralih ke {pendingProduct?.warung.nama_warung || "toko ini"}?
             </h3>
-            <img src="/image/moveToko.png" alt="Avesta Logo" className="w-80"></img>
+            <img src="/image/moveToko.png" alt="Avesta Logo" className="w-80" />
             <h3 className="flex text-sm text-center max-w-md mt-4">
               Jika ya, kami akan menyesuaikan pesanan dengan menghapus produk sebelumnya. Mohon konfirmasinya
             </h3>
             <div className="flex w-full justify-between space-x-2">
               <button
-                onClick={() => setShowSwitchStoreModal(false)}
+                onClick={() => {
+                  setShowSwitchStoreModal(false);
+                  setPendingProduct(null, 1);
+                }}
                 className="btn btn-sm btn-outline w-1/2 text-pink hover:bg-gray-100 rounded-xl border-pink border-2"
               >
                 Batal

@@ -76,6 +76,9 @@ interface CartContextType {
   showSwitchStoreModal: boolean;
   setShowSwitchStoreModal: (value: boolean) => void;
   checkStoreMatch: (product: Product) => boolean;
+  pendingProduct: Product | null; // Tambah state untuk produk sementara
+  pendingQuantity: number; // Tambah state untuk kuantitas sementara
+  setPendingProduct: (product: Product | null, quantity: number) => void; // Fungsi untuk set produk sementara
 }
 
 interface LocationContextType {
@@ -132,6 +135,14 @@ const CartProvider: React.FC<PropsWithChildren> = ({ children }) => {
       return savedCart ? JSON.parse(savedCart) : [];
   });
   const [showSwitchStoreModal, setShowSwitchStoreModal] = useState(false);
+  const [pendingProduct, setPendingProductState] = useState<Product | null>(null); // State produk sementara
+  const [pendingQuantity, setPendingQuantity] = useState(1); // State kuantitas sementara
+
+  // Fungsi untuk set produk dan kuantitas sementara
+  const setPendingProduct = (product: Product | null, quantity: number) => {
+    setPendingProductState(product);
+    setPendingQuantity(quantity);
+  };
 
   // Fungsi untuk cek apakah warung sama dengan yang ada di keranjang
   const checkStoreMatch = (product: Product) => {
@@ -205,6 +216,9 @@ const CartProvider: React.FC<PropsWithChildren> = ({ children }) => {
             showSwitchStoreModal,
             setShowSwitchStoreModal,
             checkStoreMatch,
+            pendingProduct,
+            pendingQuantity,
+            setPendingProduct,
           }}
       >
           {children}
