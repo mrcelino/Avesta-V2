@@ -18,13 +18,13 @@ export default function CallToActionSection() {
           </p>
           <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
             <Link
-              href="/register"
+              href="/register?mitra"
               className="bg-pink text-white font-semibold py-3 px-4 rounded-full text-center"
             >
               Daftar Sekarang
             </Link>
             <Link
-              href="/aboutmitra"
+              href="/mitra/about"
               className="border border-pink text-pink font-semibold py-2 px-4 rounded-full text-center"
             >
               Lihat Selengkapnya

@@ -9,11 +9,22 @@ declare let L: any;
 function PickupContent() {
   const { location } = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(3600); // 1 jam
+  const [timeLeft, setTimeLeft] = useState<number>(() => {
+    // Ambil startTime dari localStorage
+    const savedStartTime = localStorage.getItem("orderStartTime");
+    if (savedStartTime) {
+      const startTime = parseInt(savedStartTime, 10);
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const remaining = 3600 - elapsed;
+      return remaining > 0 ? remaining : 0;
+    }
+    // Jika belum ada startTime, mulai dari 3600
+    localStorage.setItem("orderStartTime", Date.now().toString());
+    return 3600;
+  });
   const [statusModal, setStatusModal] = useState<"success" | "pending" | null>(null);
   const [loadingStatus, setLoadingStatus] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
-
 
   const namaWarung = location.nama_warung || "Nama Warung";
   const alamatWarung = location.alamat_warung || "Alamat Warung";
@@ -49,14 +60,40 @@ function PickupContent() {
     }
   };
 
+  // Fungsi untuk cancel order
+  const cancelOrder = async () => {
+    if (!idOrder) {
+      console.warn("No idOrder available for cancellation");
+      return;
+    }
+
+    try {
+      const response = await axios.patch(`/api/orders/${idOrder}/cancel`, {}, { withCredentials: true });
+      console.log("Order cancelled:", response.data);
+      localStorage.removeItem("orderStartTime"); 
+      router.visit("/dashboard");
+    } catch (error: any) {
+      console.error("Error cancelling order:", error.response?.data || error);
+    }
+  };
+
   // Timer countdown
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+      setTimeLeft((prev) => {
+        if (prev <= 0) {
+          clearInterval(timer);
+          if (idOrder) {
+            cancelOrder();
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [idOrder]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -69,12 +106,9 @@ function PickupContent() {
 
     const map = L.map(mapRef.current).setView([latitude, longitude], 15);
 
-    L.tileLayer(
-      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      {
-        attribution: "© OpenStreetMap",
-      }
-    ).addTo(map);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap",
+    }).addTo(map);
 
     map.attributionControl.setPrefix("");
 
@@ -114,12 +148,8 @@ function PickupContent() {
   return (
     <div className="container mx-auto p-4 min-h-screen">
       <section className="items-center text-center pt-24">
-        <h2 className="text-2xl font-medium mb-2">
-          Ambil Pesanan dalam
-        </h2>
-        <div className="text-3xl text-pink font-semibold">
-          {formatTime(timeLeft)}
-        </div>
+        <h2 className="text-2xl font-medium mb-2">Ambil Pesanan dalam</h2>
+        <div className="text-3xl text-pink font-semibold">{formatTime(timeLeft)}</div>
         <h2 className="text-lg font-medium">Batas Waktu Pengambilan</h2>
         <h2 className="text-lg font-semibold mb-2">
           {new Date().toLocaleDateString("id-ID", {
@@ -131,14 +161,9 @@ function PickupContent() {
       </section>
 
       <section className="bg-white p-4 max-w-2xl mx-auto rounded-3xl border-2 shadow-md mt-4">
-        <h2 className="font-medium text-center text-lg mb-2">
-          Alamat Pengambilan
-        </h2>
+        <h2 className="font-medium text-center text-lg mb-2">Alamat Pengambilan</h2>
         <div className="shadow-md border-2 rounded-xl p-4">
-          <div
-            ref={mapRef}
-            className="w-full h-60 rounded-xl overflow-hidden z-0"
-          ></div>
+          <div ref={mapRef} className="w-full h-60 rounded-xl overflow-hidden z-0"></div>
           <div className="max-w-2xl mt-4">
             <h3 className="font-semibold">{namaWarung}</h3>
             <p className="font-medium">{alamatWarung}</p>
@@ -155,20 +180,26 @@ function PickupContent() {
           {loadingStatus ? "Memuat..." : "Cek Status Pengambilan"}
         </button>
 
-        {(isModalOpen && statusModal) && (
+        {isModalOpen && statusModal && (
           <dialog open className="modal bg-black/40">
             <div className={`modal-box ${statusModal === "success" ? "bg-pink" : "bg-white"}`}>
               <button
                 onClick={closeModal}
-                className={`btn btn-sm btn-circle btn-ghost absolute right-2 top-2 ${statusModal === "success" ? "text-white" : "text-pink"}`}
+                className={`btn btn-sm btn-circle btn-ghost absolute right-2 top-2 ${
+                  statusModal === "success" ? "text-white" : "text-pink"
+                }`}
               >
                 ✕
               </button>
-              <h3 className={`text-center text-3xl font-bold mb-4 ${statusModal === "success" ? "text-white" : "text-pink"}`}>
+              <h3
+                className={`text-center text-3xl font-bold mb-4 ${
+                  statusModal === "success" ? "text-white" : "text-pink"
+                }`}
+              >
                 {statusModal === "success" ? "Pengambilan Terkonfirmasi" : "Pengambilan Tertunda"}
               </h3>
               <img
-                className="px-12 py-8 flex justify-center"
+                className="px-12 py-8 flex justify-center mx-auto"
                 src={statusModal === "success" ? "/image/success.png" : "/image/gagal.png"}
                 alt={statusModal === "success" ? "Success" : "Pending"}
               />
