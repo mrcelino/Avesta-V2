@@ -160,7 +160,7 @@ function TransactionModal({
                 />
                 <div className="ml-4 flex-1">
                   <h3 className="font-semibold">
-                    {item.jenis_unggas} {parseFloat(item.jumlah_kg)}kg
+                    {item.jenis_unggas} ({parseFloat(item.jumlah_kg)})
                   </h3>
                   <p>
                     {parseFloat(item.jumlah_kg)} x Rp.{" "}
