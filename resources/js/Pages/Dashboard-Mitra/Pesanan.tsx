@@ -97,13 +97,15 @@ export default function Pesanan() {
         }
     };
 
-    const allOrders = warungData.flatMap((warung) =>
-        warung.orders.map((order) => ({
-            ...order,
-            nama_warung: warung.nama_warung,
-            alamat_warung: warung.alamat_warung,
-        }))
-    );
+    const allOrders = warungData
+        .flatMap((warung) =>
+            warung.orders.map((order) => ({
+                ...order,
+                nama_warung: warung.nama_warung,
+                alamat_warung: warung.alamat_warung,
+            }))
+        )
+        .sort((a, b) => new Date(b.tanggal_order).getTime() - new Date(a.tanggal_order).getTime());
 
     const filteredOrders = allOrders.filter((order) => {
         if (tab === "semua") return true;
