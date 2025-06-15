@@ -142,6 +142,11 @@ function PickupContent() {
 
   const closeModal = () => {
     setIsModalOpen(false);
+    if (statusModal === "success") {
+      setTimeout(() => {
+        router.visit("/dashboard");
+      }, 1500);
+    }
     setStatusModal(null);
   };
 

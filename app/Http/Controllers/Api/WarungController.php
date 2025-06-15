@@ -231,74 +231,127 @@ public function store(Request $request)
         }
     }
     
-    public function completeOrder(Request $request)
-    {
-        try {
-            $userId = Auth::id();
-            if (!$userId) {
-                return response()->json(['error' => 'User not authenticated'], 401);
-            }
-
-            $request->validate([
-                'id_order' => 'required|integer|exists:orders,id_order',
-            ]);
-
-            $order = Order::find($request->id_order);
-
-            // Pastikan order milik user yang login
-            $warung = Warung::where('id_user', $userId)
-                ->where('id_warung', $order->id_warung)
-                ->first();
-            if (!$warung) {
-                return response()->json(['error' => 'Order not found or unauthorized'], 403);
-            }
-
-            // Cek status order
-            if ($order->status_order === 'completed') {
-                return response()->json(['message' => 'Order already completed'], 400);
-            }
-            if ($order->status_order === 'canceled') {
-                return response()->json(['message' => 'Cannot complete a canceled order'], 400);
-            }
-
-            // Mulai transaksi
-            DB::beginTransaction();
-
-            // Ubah status order jadi completed
-            $order->status_order = 'completed';
-            $order->updated_at = now();
-            $order->save();
-
-            // Tambah saldo ke user (pemilik warung)
-            $user = User::find($userId);
-            if (!$user) {
-                DB::rollBack();
-                return response()->json(['error' => 'User not found'], 404);
-            }
-
-            $totalHarga = (float) $order->total_harga;
-            $user->saldo = ($user->saldo ?? 0) + $totalHarga;
-            $user->save();
-
-            // Buat entri di history_payment
-            HistoryPayment::create([
-                'tanggal_history' => now(), // Waktu sekarang
-            //   'status_history' => 'completed', // Otomatis completed
-                'tipe_transaksi' => 'pembayaran', // Tipe withdraw
-                'id_user' => $user->id_user, // Sesuaikan nama kolom id user
-                'wallet_payment' => $totalHarga, // Nominal yang ditarik
-                'id_order' => null, // Kosong untuk withdraw
-                'id_payment' => null, // Kosong untuk withdraw
-            ]);
-
-            DB::commit();
-
-            return response()->json(['message' => 'Order completed and saldo updated'], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['error' => 'Terjadi kesalahan di server: ' . $e->getMessage()], 500);
+public function completeOrder(Request $request)
+{
+    try {
+        // Cek autentikasi user
+        $userId = Auth::id();
+        if (!$userId) {
+            Log::warning('Unauthorized access attempt to complete order', ['request' => $request->all()]);
+            return response()->json(['error' => 'User not authenticated'], 401);
         }
+
+        // Validasi request
+        $request->validate([
+            'id_order' => 'required|integer|exists:orders,id_order',
+        ]);
+
+        // Mulai transaksi
+        DB::beginTransaction();
+
+        // Ambil order beserta orderItems
+        $order = Order::with('orderItems')->findOrFail($request->id_order);
+
+        // Pastikan order milik warung pemilik atau karyawan
+        $warung = Warung::where('id_warung', $order->id_warung)
+            ->where(function ($query) use ($userId) {
+                $query->where('id_user', $userId)
+                      ->orWhereHas('karyawans', fn($q) => $q->where('id_user', $userId));
+            })
+            ->first();
+
+        if (!$warung) {
+            Log::warning('Unauthorized attempt to complete order', [
+                'id_order' => $order->id_order,
+                'user_id' => $userId,
+            ]);
+            return response()->json(['error' => 'Order not found or unauthorized'], 403);
+        }
+
+        // Cek status order
+        if ($order->status_order === 'completed') {
+            Log::info('Order already completed', ['id_order' => $order->id_order]);
+            return response()->json(['message' => 'Order already completed'], 400);
+        }
+        if ($order->status_order === 'canceled') {
+            Log::info('Cannot complete canceled order', ['id_order' => $order->id_order]);
+            return response()->json(['message' => 'Cannot complete a canceled order'], 400);
+        }
+
+        // Validasi stok untuk setiap order item
+        foreach ($order->orderItems as $item) {
+            $unggas = Unggas::findOrFail($item->id_unggas);
+            if ($unggas->stok < $item->jumlah_kg) {
+                Log::error('Insufficient stock for unggas', [
+                    'id_unggas' => $item->id_unggas,
+                    'stok_kg' => $unggas->stok,
+                    'jumlah_kg' => $item->jumlah_kg,
+                ]);
+                throw new \Exception("Stok unggas {$unggas->jenis_unggas} tidak cukup. Tersedia: {$unggas->stok_kg} kg, diminta: {$item->jumlah_kg} kg");
+            }
+        }
+
+        // Kurangi stok dan tambah penjualan untuk setiap order item
+        foreach ($order->orderItems as $item) {
+            $unggas = Unggas::findOrFail($item->id_unggas);
+            $unggas->stok -= $item->jumlah_kg;
+            $unggas->penjualan += $item->jumlah_kg;
+            $unggas->save();
+            Log::info('Stock and sales updated for unggas', [
+                'id_unggas' => $unggas->id_unggas,
+                'stok_kg' => $unggas->stok,
+                'penjualan' => $unggas->penjualan,
+                'jumlah_kg' => $item->jumlah_kg,
+            ]);
+        }
+
+        // Ubah status order jadi completed
+        $order->status_order = 'completed';
+        $order->updated_at = now();
+        $order->save();
+
+        // Tambah saldo ke user (pemilik warung)
+        $user = User::findOrFail($warung->id_user); // Gunakan id_user dari warung
+        $totalHarga = (float) $order->total_harga;
+        $user->saldo = ($user->saldo ?? 0) + $totalHarga;
+        $user->save();
+
+        // Buat entri di history_payment
+        HistoryPayment::create([
+            'tanggal_history' => now(),
+            'tipe_transaksi' => 'pembayaran',
+            'id_user' => $user->id_user,
+            'wallet_payment' => $totalHarga,
+            'id_order' => $order->id_order,
+            'id_payment' => null,
+        ]);
+
+        // Commit transaksi
+        DB::commit();
+
+        Log::info('Order completed successfully', [
+            'id_order' => $order->id_order,
+            'user_id' => $userId,
+            'total_harga' => $totalHarga,
+        ]);
+
+        return response()->json([
+            'message' => 'Order completed, stock reduced, sales updated, and saldo added'
+        ], 200);
+
+    } catch (\Exception $e) {
+        // Rollback transaksi jika gagal
+        DB::rollBack();
+        Log::error('Failed to complete order', [
+            'id_order' => $request->id_order,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+        return response()->json([
+            'error' => 'Terjadi kesalahan di server: ' . $e->getMessage()
+        ], 500);
     }
+}
     
 
     public function destroy($id_warung)
