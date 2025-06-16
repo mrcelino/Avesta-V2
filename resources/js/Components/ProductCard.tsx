@@ -166,7 +166,7 @@ const ProductCard = ({ product }: { product: Product }) => {
             >
               ✕
             </button>
-            <h3 className="text-lg font-semibold mb-2">Detail Pesanan</h3>
+            <h3 className="text-lg font-semibold mb-2">Detail Produk</h3>
             <div className="flex border-2 border-slate-200 rounded-2xl p-4">
               <div className="w-1/2">
                 <img
