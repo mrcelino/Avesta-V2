@@ -2,6 +2,7 @@ import AuthLayout from "@/Layouts/AuthLayout";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "@inertiajs/react";
+import { useLocation } from "@/Layouts/AuthLayout";
 
 // Interface untuk data dari API
 interface OrderItem {
@@ -210,7 +211,7 @@ function CancelModal({
   onOrderUpdated: () => void;
 }) {
   if (!order) return null;
-
+  const { location, setLocation } = useLocation();
   const [cancelReason, setCancelReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -272,6 +273,13 @@ function CancelModal({
       }
     } finally {
       setIsSubmitting(false);
+      setLocation({
+        latitude: null,
+        longitude: null,
+        nama_warung: null,
+        alamat_warung: null,
+        id_order: null,
+      })
     }
   };
 

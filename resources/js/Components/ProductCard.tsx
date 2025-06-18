@@ -171,7 +171,7 @@ const ProductCard = ({ product }: { product: Product }) => {
               <div className="w-1/2">
                 <img
                   alt={`Image of ${displayProduct.jenis_unggas}`}
-                  className="w-full h-full rounded-xl object-cover"
+                  className="w-full h-80 rounded-xl object-cover"
                   src={`/storage/${displayProduct.foto_unggas}`}
                 />
               </div>

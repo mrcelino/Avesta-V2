@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 import { useCart } from "@/Layouts/AuthLayout";
 import { useAuth } from "@/Layouts/AuthLayout";
 import { formatIDR } from "../NavbarUser";
+import { useLocation } from "@/Layouts/AuthLayout";
+
 function LocationDropdown() {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -115,7 +117,7 @@ function Keranjang() {
 
 function Profile() {
   const { user, setUser } = useAuth();
-
+  const { setLocation } = useLocation();
   const handleLogout = async () => {
     try {
         await axios.post("/api/logout", {}, {
@@ -123,6 +125,13 @@ function Profile() {
         });
         setUser(null);
         window.location.href = "/login";
+        setLocation({
+        latitude: null,
+        longitude: null,
+        nama_warung: null,
+        alamat_warung: null,
+        id_order: null,
+      })
     } catch (error) {
         console.error("Logout failed:", error);
     }

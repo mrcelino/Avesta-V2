@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "@inertiajs/react";
 import { useAuth } from "@/Layouts/AuthLayout";
 import { useCart } from "@/Layouts/AuthLayout";
+import { useLocation } from "@/Layouts/AuthLayout";
 
 export const formatIDR = (amount: string | number) => {
   return new Intl.NumberFormat("id-ID", {
@@ -132,6 +133,7 @@ function Keranjang() {
 
 function Profile() {
   const { user, setUser } = useAuth();
+  const { setLocation } = useLocation();
 
   const handleLogout = async () => {
     try {
@@ -140,6 +142,13 @@ function Profile() {
         });
         setUser(null);
         window.location.href = "/login";
+        setLocation({
+        latitude: null,
+        longitude: null,
+        nama_warung: null,
+        alamat_warung: null,
+        id_order: null,
+      })
     } catch (error) {
         console.error("Logout failed:", error);
     }
