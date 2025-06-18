@@ -7,21 +7,38 @@ import axios from "axios";
 declare let L: any;
 
 function PickupContent() {
-  const { location } = useLocation();
+  const { location, setLocation } = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [timeLeft, setTimeLeft] = useState<number>(() => {
-    // Ambil startTime dari localStorage
-    const savedStartTime = localStorage.getItem("orderStartTime");
-    if (savedStartTime) {
-      const startTime = parseInt(savedStartTime, 10);
-      const elapsed = Math.floor((Date.now() - startTime) / 1000);
-      const remaining = 3600 - elapsed;
-      return remaining > 0 ? remaining : 0;
+  const [timeLeft, setTimeLeft] = useState<number>(10); // default 10 detik
+
+  useEffect(() => {
+    // Jika lokasi baru, reset timer dan simpan waktu sekarang
+    if (location.nama_warung) {
+      const savedStartTime = localStorage.getItem("orderStartTime");
+
+      if (!savedStartTime) {
+        localStorage.setItem("orderStartTime", Date.now().toString());
+        setTimeLeft(10);
+      } else {
+        // Kalau sudah ada startTime, cek apakah lokasi baru (misal namaWarung berbeda)
+        // Bisa juga langsung reset setiap kali nama_warung berubah
+        const startTime = parseInt(savedStartTime, 10);
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const remaining = 10 - elapsed;
+        if (remaining <= 0) {
+          // Kalau timer habis, reset timer
+          localStorage.setItem("orderStartTime", Date.now().toString());
+          setTimeLeft(10);
+        } else {
+          setTimeLeft(remaining);
+        }
+      }
+    } else {
+      // Kalau lokasi kosong/reset, hapus startTime
+      localStorage.removeItem("orderStartTime");
+      setTimeLeft(10);
     }
-    // Jika belum ada startTime, mulai dari 3600
-    localStorage.setItem("orderStartTime", Date.now().toString());
-    return 3600;
-  });
+  }, [location.nama_warung]);
   const [statusModal, setStatusModal] = useState<"success" | "pending" | null>(null);
   const [loadingStatus, setLoadingStatus] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
@@ -31,6 +48,17 @@ function PickupContent() {
   const latitude = location.latitude ? parseFloat(location.latitude) : -6.2;
   const longitude = location.longitude ? parseFloat(location.longitude) : 106.816666;
   const idOrder = location.id_order;
+
+  useEffect(() => {
+  if (
+    !location ||
+    !location.nama_warung ||
+    !location.alamat_warung ||
+    !location.id_order
+  ) {
+    router.visit("/dashboard");
+  }
+  }, [location]);
 
   // Fungsi untuk cek status order
   const checkOrderStatus = async () => {
@@ -71,6 +99,13 @@ function PickupContent() {
       const response = await axios.patch(`/api/orders/${idOrder}/cancel`, {}, { withCredentials: true });
       console.log("Order cancelled:", response.data);
       localStorage.removeItem("orderStartTime"); 
+      setLocation({
+        latitude: null,
+        longitude: null,
+        nama_warung: null,
+        alamat_warung: null,
+        id_order: null,
+      }); // Clear location state
       router.visit("/dashboard");
     } catch (error: any) {
       console.error("Error cancelling order:", error.response?.data || error);
