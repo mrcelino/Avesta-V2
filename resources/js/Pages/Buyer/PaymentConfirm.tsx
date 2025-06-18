@@ -177,7 +177,7 @@ const PaymentContent: React.FC = () => {
                 <button
                     onClick={handleVerify}
                     className="btn w-56 bg-pink text-white hover:bg-pink font-semibold py-2 px-4 rounded-2xl"
-                    disabled={!user} // Disable tombol kalo belum siap
+                    disabled={cart.length === 0 || !user} // Disable kalau cart kosong atau user belum siap
                 >
                     Konfirmasi
                 </button>

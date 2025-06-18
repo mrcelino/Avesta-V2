@@ -149,7 +149,10 @@ const CartContent: React.FC = () => {
           </div>
           <button
             onClick={handleConfirm}
-            className="bg-pink text-white w-full py-2 rounded-xl font-bold btn"
+            disabled={cart.length === 0}
+            className={`w-full py-2 rounded-xl font-bold btn ${
+              cart.length === 0 ? "bg-gray-300 cursor-not-allowed" : "bg-pink text-white"
+            }`}
           >
             Konfirmasi
           </button>

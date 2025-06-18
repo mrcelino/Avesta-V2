@@ -32,7 +32,7 @@ const PaymentContent: React.FC = () => {
         </div>
       </div>
 
-      <RingkasanBelanja totalBelanja={totalBelanja} />
+      <RingkasanBelanja totalBelanja={totalBelanja} cartEmpty={cart.length === 0} />
     </main>
   );
 };
@@ -102,7 +102,13 @@ function ProdukItem({ item }: ProdukItemProps) {
   );
 }
 
-function RingkasanBelanja({ totalBelanja }: { totalBelanja: number }) {
+function RingkasanBelanja({
+    totalBelanja,
+    cartEmpty,
+  }: {
+    totalBelanja: number;
+    cartEmpty: boolean;
+  }) {
   return (
     <div className="flex flex-col gap-4 w-1/3">
       <div className="bg-white p-4 rounded-lg shadow mt-12">
@@ -113,8 +119,12 @@ function RingkasanBelanja({ totalBelanja }: { totalBelanja: number }) {
         </div>
       </div>
       <Link
-        href="/paymentconfirm"
-        className="bg-pink text-white rounded-2xl btn w-full"
+        href={cartEmpty ? "#" : "/paymentconfirm"}
+        className={`rounded-2xl btn w-full text-center ${
+          cartEmpty
+            ? "bg-gray-300 text-white cursor-not-allowed pointer-events-none"
+            : "bg-pink text-white"
+        }`}
       >
         Bayar dengan AvestaPay
       </Link>
