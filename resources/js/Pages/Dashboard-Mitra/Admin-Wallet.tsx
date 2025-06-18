@@ -62,7 +62,7 @@ const WalletContent: React.FC = () => {
                         </div>
                         <div className="flex space-x-4">
                             <Link
-                                href="/withdraw"
+                                href="/admin/withdraw"
                                 className="btn bg-white text-pink text-lg rounded-xl font-semibold hover:scale-105 transition duration-300"
                             >
                                 Tarik

@@ -84,7 +84,7 @@ export default function Toko() {
               {warung.alamat_warung}
             </p>
             <div className="flex space-x-4">
-              <InfoCard icon="/vector/pin.svg" label={warung.kelurahan} description="Kelurahan" />
+              <InfoCard icon="/vector/Pin.svg" label={warung.kelurahan} description="Kelurahan" />
               <InfoCard icon="/vector/price.svg" label="100+" description="Penjualan" />
               <InfoCard icon="/vector/chat.svg" label="Chat" description="Penjual" />
             </div>
