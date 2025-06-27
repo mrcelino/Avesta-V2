@@ -171,7 +171,7 @@ const Profile = ({ user, setUser }: { user: User; setUser: (user: User | null) =
 
       <ul
         tabIndex={0}
-        className="dropdown-content menu min-w-60 max-w-2xl min-h-40 bg-base-100 rounded-2xl z-1 mt-2 p-3 shadow-md"
+        className="dropdown-content menu min-w-60 max-w-2xl h-fit bg-base-100 rounded-2xl z-1 mt-2 p-3 shadow-md"
       >
         <div className="flex items-center justify-start gap-4 max-w-2xl min-h-14 border-2 p-2 rounded-xl shadow-2xs">
           <div className="rounded-full w-10 h-10 overflow-hidden bg-gray-200">
@@ -185,19 +185,22 @@ const Profile = ({ user, setUser }: { user: User; setUser: (user: User | null) =
           </div>
           <div className="flex-col">
             <p className="font-semibold text-base">{user.nama_depan || "Loading..."}</p>
-            <Link href="admin/wallet" className="flex flex-row items-center gap-2">
-              <img src="/image/coin.svg" alt="Coin Icon" className="size-5 object-cover" />
-              <p className="text-base">{formatIDR(Number(user.saldo))}</p>
-            </Link>
+            {user.role === "pemilik" && (
+              <Link href="admin/wallet" className="flex flex-row items-center gap-2">
+                <img src="/image/coin.svg" alt="Coin Icon" className="size-5 object-cover" />
+                <p className="text-base">{formatIDR(Number(user.saldo))}</p>
+              </Link>
+            )}
           </div>
         </div>
-
-        <Link
-          href="/settings"
-          className="bg-white hover:bg-pink hover:text-white rounded-3xl px-5 py-2 font-semibold transition duration-300 hover:scale-105"
-        >
-          Pengaturan
-        </Link>
+          {user.role === "pemilik" && (
+            <Link
+              href="/admin/wallet"
+              className="bg-white hover:bg-pink hover:text-white rounded-3xl px-5 py-2 font-semibold transition duration-300 hover:scale-105 mt-2"
+            >
+              AvestaPay
+            </Link>
+          )}
         <div
           onClick={handleLogout}
           className="flex justify-between pr-4 bg-white hover:bg-pink hover:text-white rounded-3xl px-5 py-2 font-semibold transition duration-300 hover:scale-105 cursor-pointer"

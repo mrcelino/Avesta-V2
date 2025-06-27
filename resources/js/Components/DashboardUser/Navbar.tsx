@@ -174,10 +174,15 @@ function Profile() {
           </Link>
         </div>
       </div>
-
+        <Link
+            href="/wallet"
+            className="bg-white hover:bg-pink hover:text-white rounded-3xl px-5 py-2 font-semibold transition duration-300 hover:scale-105 mt-4"
+            >
+        AvestaPay
+        </Link>
       <Link
         href="/purchasehistory"
-        className="bg-white hover:bg-pink hover:text-white rounded-3xl px-5 py-2 font-semibold transition duration-300 hover:scale-105 mt-4"
+        className="bg-white hover:bg-pink hover:text-white rounded-3xl px-5 py-2 font-semibold transition duration-300 hover:scale-105"
       >
         Riwayat Pembelian
       </Link>
