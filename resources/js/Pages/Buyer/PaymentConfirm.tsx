@@ -118,6 +118,9 @@ const PaymentContent: React.FC = () => {
                 nama_warung: cart[0].warung.nama_warung,
                 alamat_warung: cart[0].warung.alamat_warung,
                 id_order: orderResponse.data.id_order, 
+                id_payment: orderResponse.data.id_payment,
+                wallet_payment: orderResponse.data.wallet_payment,
+                id_user: orderResponse.data.id_user, 
             } : { latitude: null, longitude: null, nama_warung: null, alamat_warung: null, id_order: null };
 
             // Ngosongin keranjang kalo berhasil

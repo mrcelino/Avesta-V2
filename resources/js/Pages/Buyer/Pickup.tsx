@@ -9,7 +9,7 @@ declare let L: any;
 function PickupContent() {
   const { location, setLocation } = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [timeLeft, setTimeLeft] = useState<number>(10); // default 10 detik
+  const [timeLeft, setTimeLeft] = useState<number>(60); // default 10 detik
 
   useEffect(() => {
     // Jika lokasi baru, reset timer dan simpan waktu sekarang
@@ -18,17 +18,17 @@ function PickupContent() {
 
       if (!savedStartTime) {
         localStorage.setItem("orderStartTime", Date.now().toString());
-        setTimeLeft(10);
+        setTimeLeft(60);
       } else {
         // Kalau sudah ada startTime, cek apakah lokasi baru (misal namaWarung berbeda)
         // Bisa juga langsung reset setiap kali nama_warung berubah
         const startTime = parseInt(savedStartTime, 10);
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        const remaining = 10 - elapsed;
+        const remaining = 60 - elapsed;
         if (remaining <= 0) {
           // Kalau timer habis, reset timer
           localStorage.setItem("orderStartTime", Date.now().toString());
-          setTimeLeft(10);
+          setTimeLeft(60);
         } else {
           setTimeLeft(remaining);
         }
@@ -36,7 +36,7 @@ function PickupContent() {
     } else {
       // Kalau lokasi kosong/reset, hapus startTime
       localStorage.removeItem("orderStartTime");
-      setTimeLeft(10);
+      setTimeLeft(60);
     }
   }, [location.nama_warung]);
   const [statusModal, setStatusModal] = useState<"success" | "pending" | null>(null);
@@ -99,12 +99,30 @@ function PickupContent() {
       const response = await axios.patch(`/api/orders/${idOrder}/cancel`, {}, { withCredentials: true });
       console.log("Order cancelled:", response.data);
       localStorage.removeItem("orderStartTime"); 
+      // 2. Buat record baru di HistoryPayment
+      await axios.post(
+        "/api/history",
+        {
+          id_user: location.id_user,
+          id_order: location.id_order,
+          id_payment: location.id_payment,
+          tanggal_history: new Date().toISOString(),
+          tipe_transaksi: "refund",
+          wallet_payment: location.wallet_payment,
+        },
+        {
+          withCredentials: true,
+        }
+      );
       setLocation({
         latitude: null,
         longitude: null,
         nama_warung: null,
         alamat_warung: null,
         id_order: null,
+        id_payment: null,
+        wallet_payment: null,
+        id_user: null,
       }); // Clear location state
       router.visit("/dashboard");
     } catch (error: any) {
@@ -184,6 +202,30 @@ function PickupContent() {
     }
     setStatusModal(null);
   };
+
+  useEffect(() => {
+  if (!idOrder) return;
+
+  const interval = setInterval(async () => {
+    try {
+      const response = await axios.get(`/api/order-status/${idOrder}`, {
+        withCredentials: true,
+      });
+
+      const status = response.data.status_order;
+      if (status === "completed") {
+        // Bersihkan interval agar tidak terus mengecek
+        clearInterval(interval);
+        // Redirect ke dashboard
+        router.visit("/dashboard");
+      }
+    } catch (error) {
+      console.error("Gagal cek status otomatis:", error);
+    }
+  }, 3000); // cek setiap 3 detik
+
+  return () => clearInterval(interval);
+}, [idOrder]);
 
   return (
     <div className="container mx-auto p-4 min-h-screen">

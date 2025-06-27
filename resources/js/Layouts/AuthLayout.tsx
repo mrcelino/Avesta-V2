@@ -88,6 +88,10 @@ interface LocationContextType {
     nama_warung?: string | null;
     alamat_warung?: string | null;
     id_order?: string | null;
+    id_payment?: string | null; // ✅ Tambahkan ini
+    wallet_payment?: string | null; // ✅ Tambahkan ini
+    id_user?: string | null; // ✅ Tambahkan ini
+
   };
   setLocation: React.Dispatch<
     React.SetStateAction<{
@@ -96,6 +100,9 @@ interface LocationContextType {
       nama_warung?: string | null;
       alamat_warung?: string | null;
       id_order?: string | null;
+      id_payment?: string | null;
+      wallet_payment?: string | null;
+      id_user?: string | null;
     }>
   >;
 }
@@ -240,6 +247,9 @@ const AuthLayout: React.FC<PropsWithChildren<AuthLayoutProps>> = ({
     nama_warung?: string | null;
     alamat_warung?: string | null;
     id_order?: string | null;
+    id_payment?: string | null;
+    wallet_payment?: string | null;
+    id_user?: string | null;
   }>(() => {
     const savedLocation = localStorage.getItem("location");
     return savedLocation ? JSON.parse(savedLocation) : {
@@ -248,6 +258,9 @@ const AuthLayout: React.FC<PropsWithChildren<AuthLayoutProps>> = ({
       nama_warung: null,
       alamat_warung: null,
       id_order: null,
+      id_payment: null,
+      wallet_payment: null,
+      id_user: null,
     };
   });
 
