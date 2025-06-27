@@ -125,23 +125,27 @@ class WarungController extends Controller
                 }
             }
 
-            // Tambahkan jenis_unggas ke order_items dengan join (logika ini tetap)
-            $toko = $toko->map(function ($warung) {
-                $warung->orders = $warung->orders->map(function ($order) {
-                    if ($order->orderItems) {
-                        $order->order_items = $order->orderItems->map(function ($item) {
-                            // Ambil jenis_unggas dari tabel unggas berdasarkan id_unggas
-                            $jenisUnggas = DB::table('unggas')
-                                ->where('id_unggas', $item->id_unggas)
-                                ->value('jenis_unggas');
-                            $item->jenis_unggas = $jenisUnggas ?? 'Nama Unggas Tidak Diketahui';
-                            return $item;
-                        });
-                    }
-                    return $order;
-                });
-                return $warung;
+        // Tambahkan jenis_unggas dan foto_unggas ke order_items dengan join
+        $toko = $toko->map(function ($warung) {
+            $warung->orders = $warung->orders->map(function ($order) {
+                if ($order->orderItems) {
+                    $order->order_items = $order->orderItems->map(function ($item) {
+                        // Ambil jenis_unggas dan foto_unggas dari tabel unggas berdasarkan id_unggas
+                        $unggas = DB::table('unggas')
+                            ->where('id_unggas', $item->id_unggas)
+                            ->select('jenis_unggas', 'foto_unggas')
+                            ->first();
+                        
+                        $item->jenis_unggas = $unggas->jenis_unggas ?? 'Nama Unggas Tidak Diketahui';
+                        $item->foto_unggas = $unggas->foto_unggas ?? null;
+                        
+                        return $item;
+                    });
+                }
+                return $order;
             });
+            return $warung;
+        });
 
             return response()->json($toko, 200);
         } catch (\Exception $e) {

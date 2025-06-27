@@ -140,6 +140,8 @@ class OrderController extends Controller
                 'success' => true,
                 'id_order' => $order->id_order,
                 'id_payment' => $order->payment ? $order->payment->id_payment : null, // Tambah id_payment di response
+                'id_user' => $order->id_user,
+                'wallet_payment' => $order->total_harga,
                 'message' => 'Order and items created successfully',
             ], 201);
 
@@ -195,6 +197,7 @@ class OrderController extends Controller
                         'nama_warung' => $order->warung ? $order->warung->nama_warung : null,
                         'alamat_warung' => $order->warung ? $order->warung->alamat_warung : null,
                         'tanggal_order' => $order->tanggal_order,
+                        'created_at' => $order->created_at,
                         'total_harga' => $order->total_harga,
                         'status_order' => $order->status_order,
                         'order_items' => $order->orderItems->map(function ($item) {
