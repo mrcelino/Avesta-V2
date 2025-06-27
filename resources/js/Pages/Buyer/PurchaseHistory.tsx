@@ -26,6 +26,7 @@ interface Order {
   alamat_warung: string;
   tanggal_order: string;
   total_harga: string;
+  created_at: string;
   status_order: "processed" | "completed" | "canceled";
   order_items: OrderItem[];
 }
@@ -429,9 +430,15 @@ export default function PurchaseHistory() {
     try {
       const response = await fetch("/api/orders");
       const result = await response.json();
+      console.log("Fetched orders:", result);
       if (result.success) {
-        setOrders(result.data);
-        setFilteredOrders(result.data);
+const sortedData = result.data.sort(
+  (a: Order, b: Order) =>
+    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+);
+
+        setOrders(sortedData);
+        setFilteredOrders(sortedData);
       } else {
         setError("Failed to fetch orders");
       }
@@ -441,6 +448,7 @@ export default function PurchaseHistory() {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     fetchOrders();

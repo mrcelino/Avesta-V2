@@ -56,6 +56,8 @@ export default function Pesanan() {
     const [perPage, setPerPage] = useState<number | "all">(10);
     const [showPerPageOptions, setShowPerPageOptions] = useState(false);
     const perPageOptions: (number | "all")[] = [5, 10, 20, "all"];
+    const [sortOrderAsc, setSortOrderAsc] = useState(false); // false = descending default
+
 
     const tabList = [
         { key: "semua", label: "Semua Pesanan" },
@@ -105,7 +107,19 @@ export default function Pesanan() {
                 alamat_warung: warung.alamat_warung,
             }))
         )
-        .sort((a, b) => new Date(b.tanggal_order).getTime() - new Date(a.tanggal_order).getTime());
+        .sort((a, b) => {
+            const timeA = new Date(a.tanggal_order + "T00:00:00").getTime();
+            const timeB = new Date(b.tanggal_order + "T00:00:00").getTime();
+
+            // fallback to created_at if tanggal_order is the same
+            if (timeA === timeB) {
+                const createdA = new Date(a.created_at).getTime();
+                const createdB = new Date(b.created_at).getTime();
+                return sortOrderAsc ? createdA - createdB : createdB - createdA;
+            }
+
+            return sortOrderAsc ? timeA - timeB : timeB - timeA;
+        });
 
     const filteredOrders = allOrders.filter((order) => {
         if (tab === "semua") return true;
@@ -181,7 +195,15 @@ export default function Pesanan() {
                                 Jumlah Pesanan(kg)
                             </th>
                             <th className="p-3 font-semibold">Catatan</th>
-                            <th className="p-3 font-semibold">Tanggal Pesanan</th>
+                            <th
+                                className="p-3 font-semibold cursor-pointer hover:scale-105 transition duration-300"
+                                onClick={() => setSortOrderAsc(!sortOrderAsc)}
+                            >
+                                Tanggal Pesanan
+                                <span className="ml-1">
+                                    {sortOrderAsc ? "🔺" : "🔻"}
+                                </span>
+                            </th>
                             <th className="p-3 font-semibold">Sudah Diambil</th>
                         </tr>
                     </thead>
